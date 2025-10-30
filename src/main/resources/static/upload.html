@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; max-width: 600px; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back to Video Library</a>
+    <h1>📤 Upload Video</h1>
+    
+    <form id="uploadForm">
+        <div class="form-group">
+            <label for="videoFile">Video File:</label>
+            <input type="file" id="videoFile" accept="video/*" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="videoName">Video Name:</label>
+            <input type="text" id="videoName" placeholder="Enter video name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" rows="3" placeholder="Enter video description" required></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="courseId">Course ID:</label>
+            <input type="text" id="courseId" placeholder="Enter course ID" required>
+        </div>
+        
+        <button type="submit" id="uploadBtn">Upload Video</button>
+    </form>
+    
+    <div id="message" style="margin-top: 20px;"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('videoFile');
+            const videoName = document.getElementById('videoName').value;
+            const description = document.getElementById('description').value;
+            const courseId = document.getElementById('courseId').value;
+            const uploadBtn = document.getElementById('uploadBtn');
+            const messageDiv = document.getElementById('message');
+            
+            if (!fileInput.files[0]) {
+                messageDiv.innerHTML = '<p style="color: red;">Please select a video file</p>';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('name', videoName);
+            formData.append('description', description);
+            formData.append('courseId', courseId);
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            messageDiv.innerHTML = '<p>Uploading video, please wait...</p>';
+            
+            try {
+                const response = await fetch('/api/videos/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const video = await response.json();
+                    messageDiv.innerHTML = `
+                        <p style="color: green;">
+                            ✅ Video uploaded successfully!<br>
+                            <a href="watch.html?id=${video.id}">Watch Video</a> | 
+                            <a href="index.html">View All Videos</a>
+                        </p>
+                    `;
+                    document.getElementById('uploadForm').reset();
+                } else {
+                    messageDiv.innerHTML = '<p style="color: red;">Error uploading video</p>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<p style="color: red;">Error uploading video: ' + error.message + '</p>';
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Video';
+            }
+        });
+    </script>
+</body>
+</html>

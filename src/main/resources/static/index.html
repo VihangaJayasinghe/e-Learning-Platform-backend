@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Library</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .video-card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .video-card h3 { margin: 0 0 10px 0; }
+        .video-card button { background: #007bff; color: white; border: none; padding: 8px 15px; cursor: pointer; }
+        .video-card button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🎥 Video Library</h1>
+    <a href="upload.html" style="background: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Upload New Video</a>
+    
+    <div id="videoList">
+        <p>Loading videos...</p>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Load all videos when page loads
+        loadAllVideos();
+        
+        async function loadAllVideos() {
+            try {
+                const response = await fetch('http://localhost:8080/api/videos');
+                const videos = await response.json();
+                
+                const videoList = document.getElementById('videoList');
+                videoList.innerHTML = '';
+                
+                if (videos.length === 0) {
+                    videoList.innerHTML = '<p>No videos uploaded yet.</p>';
+                    return;
+                }
+                
+                videos.forEach(video => {
+                    const videoCard = document.createElement('div');
+                    videoCard.className = 'video-card';
+                    videoCard.innerHTML = `
+                        <h3>${video.videoName}</h3>
+                        <p>${video.description}</p>
+                        <small>Size: ${(video.fileSize / (1024*1024)).toFixed(2)} MB</small><br>
+                        <small>Uploaded: ${new Date(video.uploadDate).toLocaleString()}</small><br>
+                        <button onclick="watchVideo('${video.id}')">Watch Video</button>
+                        <button onclick="deleteVideo('${video.id}')" style="background: #dc3545;">Delete</button>
+                    `;
+                    videoList.appendChild(videoCard);
+                });
+            } catch (error) {
+                document.getElementById('videoList').innerHTML = '<p>Error loading videos</p>';
+                console.error('Error:', error);
+            }
+        }
+        
+        function watchVideo(videoId) {
+            window.location.href = `watch.html?id=${videoId}`;
+        }
+        
+        async function deleteVideo(videoId) {
+            if (confirm('Are you sure you want to delete this video?')) {
+                try {
+                    await fetch(`http://localhost:8080/api/videos/${videoId}`, {
+                        method: 'DELETE'
+                    });
+                    loadAllVideos(); // Reload the list
+                } catch (error) {
+                    alert('Error deleting video');
+                    console.error('Error:', error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

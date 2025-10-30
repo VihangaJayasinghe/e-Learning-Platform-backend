@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Video</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #007bff; text-decoration: none; }
+        .video-container { max-width: 800px; margin: 0 auto; }
+        video { width: 100%; border: 1px solid #ddd; border-radius: 5px; }
+        .video-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px; }
+        
+        /* Disable text selection and context menu */
+        .no-context { 
+            -webkit-touch-callout: none; 
+            -webkit-user-select: none; 
+            -khtml-user-select: none;
+            -moz-user-select: none; 
+            -ms-user-select: none; 
+            user-select: none; 
+        }
+        
+        /* Protection notice */
+        .protection-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 14px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body class="no-context">
+    <a href="index.html" class="back-link">← Back to Video Library</a>
+    
+    <div class="video-container">
+        <h1 id="videoTitle">Loading...</h1>
+        
+        <div class="protection-notice">
+            🔒 This video is protected. Downloading and sharing are disabled.
+        </div>
+        
+        <div id="videoPlayer">
+            <p>Loading video player...</p>
+        </div>
+        
+        <div id="videoInfo" class="video-info">
+            <p id="videoDescription"></p>
+            <small id="videoDetails"></small>
+        </div>
+    </div>
+
+    <script>
+        // Silent protection - no alerts
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            // Disable Ctrl+S, Ctrl+U, F12 silently
+            if (e.ctrlKey && (e.key === 's' || e.key === 'u') || e.key === 'F12') {
+                e.preventDefault();
+            }
+        });
+        
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+        });
+
+        // Get video ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoId = urlParams.get('id');
+        
+        if (!videoId) {
+            document.getElementById('videoPlayer').innerHTML = '<p style="color: red;">No video ID provided</p>';
+        } else {
+            loadVideo(videoId);
+        }
+        
+        async function loadVideo(videoId) {
+            try {
+                const response = await fetch(`/api/videos/${videoId}`);
+                if (!response.ok) {
+                    throw new Error('Video not found');
+                }
+                
+                const video = await response.json();
+                
+                // Update page content
+                document.getElementById('videoTitle').textContent = video.videoName;
+                document.getElementById('videoDescription').textContent = video.description;
+                document.getElementById('videoDetails').textContent = 
+                    `Size: ${(video.fileSize / (1024*1024)).toFixed(2)} MB | ` +
+                    `Uploaded: ${new Date(video.uploadDate).toLocaleString()} | ` +
+                    `Course: ${video.courseId}`;
+                
+                // Create video player with download disabled
+                document.getElementById('videoPlayer').innerHTML = `
+                    <video controls controlsList="nodownload noremoteplayback" disablePictureInPicture>
+                        <source src="${video.firebaseUrl}" type="${video.contentType}">
+                        Your browser does not support the video tag.
+                    </video>
+                `;
+                
+                // Additional silent protection for video element
+                const videoElement = document.querySelector('video');
+                if (videoElement) {
+                    videoElement.addEventListener('contextmenu', function(e) {
+                        e.preventDefault();
+                    });
+                }
+                
+            } catch (error) {
+                document.getElementById('videoPlayer').innerHTML = 
+                    '<p style="color: red;">Error loading video: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>
