@@ -1,0 +1,140 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs
+hs_err_pid*
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+## IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+## Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+## NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+## VS Code
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Firebase credentials 
+firebase-service-account.json
+src/main/resources/firebase-service-account.json
+src/main/resources/*.json
+
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Application properties (if you have sensitive data)
+# src/main/resources/application-prod.properties
+
+# Logs
+logs/
+*.log
+log/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build outputs
+build/
+out/
+
+# Package files
+*.jar
+*.war
+
+# Unit test reports
+TEST*.xml
+
+# Generated documentation
+/docs/html/
+/docs/pdf/
+
+# Mac
+.AppleDouble
+.LSOverride
+
+# Windows
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# Local configuration
+local.properties
+
+
+# Android (if applicable)
+.keystore
+
+# Backup files
+*.bak
+*.backup
+
+# Large media files (if any)
+*.mp4
+*.avi
+*.mov
+*.mkv
