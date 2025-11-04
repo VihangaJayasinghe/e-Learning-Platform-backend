@@ -27,19 +27,39 @@ public class CloudinaryStorageService {
     
     public void deleteVideo(String fileUrl) {
         try {
-            // Extract public ID from URL
             String publicId = extractPublicIdFromUrl(fileUrl);
-            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            
+            Map result = cloudinary.uploader().destroy(publicId, 
+                ObjectUtils.asMap(
+                    "resource_type", "video"
+                ));
+            
+            if (!"ok".equals(result.get("result"))) {
+                throw new RuntimeException("Cloudinary deletion failed: " + result.get("result"));
+            }
+            
         } catch (Exception e) {
-            System.out.println("Error deleting video: " + e.getMessage());
+            throw new RuntimeException("Cloudinary deletion failed: " + e.getMessage());
         }
     }
-    
+
     private String extractPublicIdFromUrl(String fileUrl) {
-        // Extract public ID from Cloudinary URL
-        // URL format: https://res.cloudinary.com/cloud-name/video/upload/v1234567/public-id.mp4
-        String[] parts = fileUrl.split("/");
-        String fileNameWithExtension = parts[parts.length - 1];
-        return "elearning-videos/" + fileNameWithExtension.split("\\.")[0];
+        try {
+            String[] parts = fileUrl.split("/upload/");
+            if (parts.length < 2) {
+                throw new RuntimeException("Invalid Cloudinary URL format");
+            }
+            
+            String pathAfterUpload = parts[1];
+            
+            if (pathAfterUpload.startsWith("v")) {
+                pathAfterUpload = pathAfterUpload.substring(pathAfterUpload.indexOf("/") + 1);
+            }
+            
+            return pathAfterUpload.split("\\.")[0];
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid Cloudinary URL format: " + e.getMessage());
+        }
     }
 }

@@ -23,22 +23,19 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public Video uploadVideo(MultipartFile file, String name, String description, String courseId) {
         try {
-            // Validate file
             if (file.isEmpty()) {
                 throw new RuntimeException("File is empty");
             }
             
-            // 1. Upload to Cloudinary and get REAL URL
             String cloudinaryUrl = cloudinaryStorageService.uploadVideo(file);
             
-            // 2. Save metadata to MongoDB
             Video video = Video.builder()
                     .videoName(name)
                     .description(description)
                     .fileName(file.getOriginalFilename())
                     .fileSize(file.getSize())
                     .contentType(file.getContentType())
-                    .firebaseUrl(cloudinaryUrl) // Now Cloudinary URL
+                    .firebaseUrl(cloudinaryUrl)
                     .courseId(courseId)
                     .uploadedBy("user123")
                     .uploadDate(LocalDateTime.now())
@@ -51,7 +48,6 @@ public class VideoServiceImpl implements VideoService {
         }
     }
 
-    // ... keep all other methods the same
     @Override
     public Video uploadTestVideo(Video video) {
         return videoRepository.save(video);
@@ -76,10 +72,14 @@ public class VideoServiceImpl implements VideoService {
     public void deleteVideo(String id) {
         Video video = videoRepository.findById(id).orElse(null);
         if (video != null) {
-            // Delete from Cloudinary
-            cloudinaryStorageService.deleteVideo(video.getFirebaseUrl());
-            // Delete from MongoDB
-            videoRepository.deleteById(id);
+            try {
+                // Delete from Cloudinary first
+                cloudinaryStorageService.deleteVideo(video.getFirebaseUrl());
+                // Only delete from MongoDB if Cloudinary succeeds
+                videoRepository.deleteById(id);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to delete video from storage: " + e.getMessage());
+            }
         }
     }
 }
