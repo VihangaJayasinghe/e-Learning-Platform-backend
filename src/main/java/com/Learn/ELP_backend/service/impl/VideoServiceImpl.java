@@ -21,7 +21,7 @@ public class VideoServiceImpl implements VideoService {
     private CloudinaryStorageService cloudinaryStorageService;
 
     @Override
-    public Video uploadVideo(MultipartFile file, String name, String description, String courseId) {
+    public Video uploadVideo(MultipartFile file, String name, String description) {
         try {
             if (file.isEmpty()) {
                 throw new RuntimeException("File is empty");
@@ -36,7 +36,6 @@ public class VideoServiceImpl implements VideoService {
                     .fileSize(file.getSize())
                     .contentType(file.getContentType())
                     .firebaseUrl(cloudinaryUrl)
-                    .courseId(courseId)
                     .uploadedBy("user123")
                     .uploadDate(LocalDateTime.now())
                     .build();
@@ -61,11 +60,6 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public Video getVideoById(String id) {
         return videoRepository.findById(id).orElse(null);
-    }
-
-    @Override
-    public List<Video> getVideosByCourse(String courseId) {
-        return videoRepository.findByCourseId(courseId);
     }
 
     @Override

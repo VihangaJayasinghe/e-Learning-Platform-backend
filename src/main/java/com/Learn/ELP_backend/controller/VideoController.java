@@ -21,10 +21,9 @@ public class VideoController {
     public ResponseEntity<Video> uploadVideo(
             @RequestParam("file") MultipartFile file,
             @RequestParam("name") String name,
-            @RequestParam("description") String description,
-            @RequestParam("courseId") String courseId) {
+            @RequestParam("description") String description) {
         
-        Video video = videoService.uploadVideo(file, name, description, courseId);
+        Video video = videoService.uploadVideo(file, name, description);
         return ResponseEntity.ok(video);
     }
 
@@ -38,7 +37,6 @@ public class VideoController {
                 .fileName("test.mp4")
                 .fileSize(1048576L)
                 .contentType("video/mp4")
-                .courseId("course123")
                 .uploadedBy("test-user")
                 .uploadDate(LocalDateTime.now())
                 .build();
@@ -62,13 +60,6 @@ public class VideoController {
             return ResponseEntity.ok(video);
         }
         return ResponseEntity.notFound().build();
-    }
-
-    // Get videos by course
-    @GetMapping("/course/{courseId}")
-    public ResponseEntity<List<Video>> getVideosByCourse(@PathVariable String courseId) {
-        List<Video> videos = videoService.getVideosByCourse(courseId);
-        return ResponseEntity.ok(videos);
     }
 
     // Delete video

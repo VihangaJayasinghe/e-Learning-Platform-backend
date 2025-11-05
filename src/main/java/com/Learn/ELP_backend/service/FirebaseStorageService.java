@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Service
@@ -32,7 +35,7 @@ public class FirebaseStorageService {
         // Generate public URL for accessing the video
         return String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media", 
                            BUCKET_NAME, 
-                           java.net.URLEncoder.encode(fileName, "UTF-8"));
+                           URLEncoder.encode(fileName, StandardCharsets.UTF_8));
     }
     
     public void deleteVideo(String fileUrl) {
@@ -49,6 +52,6 @@ public class FirebaseStorageService {
         // Extract "videos/xxx-filename" from the full URL
         String baseUrl = "https://firebasestorage.googleapis.com/v0/b/" + BUCKET_NAME + "/o/";
         String encodedFileName = fileUrl.replace(baseUrl, "").split("\\?")[0];
-        return java.net.URLDecoder.decode(encodedFileName);
+        return URLDecoder.decode(encodedFileName, StandardCharsets.UTF_8);
     }
 }
