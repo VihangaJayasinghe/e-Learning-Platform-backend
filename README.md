@@ -8,14 +8,11 @@ Branching rules (must follow)
   - git checkout -b <branch-name>   (while on dev)
 
 Example branch name patterns
-- feature/<ticket>-short-desc
-  - e.g. feature/123-add-auth
-- fix/<ticket>-short-desc
-  - e.g. fix/45-fix-login
-- chore/<ticket>-short-desc
-  - e.g. chore/10-update-deps
-- hotfix/<ticket>-short-desc
-  - e.g. hotfix/200-fix-db-seed
+- feat/<discribe-feature>
+  - e.g. feat/add_student_CRUD
+- bug/<discribe-the-bug-you-aim-to-fix>
+  - e.g. bug/videos_not_loading
+...
 
 Basic workflow
 1. Start from dev:
