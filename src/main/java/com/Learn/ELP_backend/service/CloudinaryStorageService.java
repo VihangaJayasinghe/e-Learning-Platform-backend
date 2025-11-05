@@ -16,7 +16,8 @@ public class CloudinaryStorageService {
     private Cloudinary cloudinary;
 
     public String uploadVideo(MultipartFile file) throws IOException {
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), 
+        @SuppressWarnings("unchecked")
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), 
             ObjectUtils.asMap(
                 "resource_type", "video",
                 "folder", "elearning-videos"
@@ -29,7 +30,8 @@ public class CloudinaryStorageService {
         try {
             String publicId = extractPublicIdFromUrl(fileUrl);
             
-            Map result = cloudinary.uploader().destroy(publicId, 
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = cloudinary.uploader().destroy(publicId, 
                 ObjectUtils.asMap(
                     "resource_type", "video"
                 ));
