@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Month Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { border: 1px solid #ddd; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        .btn { padding: 8px 16px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .video-item { background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 4px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="classes.html" class="back-link">← Back to Classes</a>
+        <h1 id="pageTitle">Month Management</h1>
+        
+        <div id="monthInfo" class="card">
+            <p>Loading month information...</p>
+        </div>
+
+        <div class="card">
+            <h3>Add Video to This Month</h3>
+            <div style="margin: 10px 0;">
+                <label>Video ID:</label>
+                <input type="text" id="videoId" placeholder="Enter video ID" style="padding: 8px; width: 200px;">
+                <button class="btn btn-primary" onclick="addVideoToMonth()">Add Video</button>
+            </div>
+            <p><small>Get video IDs from the <a href="index.html">Video Library</a></small></p>
+        </div>
+
+        <div class="card">
+            <h3>Videos in This Month</h3>
+            <div id="videosList">
+                <p>Loading videos...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const classId = urlParams.get('classId');
+        const yearMonth = urlParams.get('yearMonth');
+
+        if (!classId || !yearMonth) {
+            alert('Missing class ID or month information');
+            window.location.href = 'classes.html';
+        }
+
+        // Load class and month information
+        loadClassInfo();
+
+        async function loadClassInfo() {
+            try {
+                // Load class details
+                const classResponse = await fetch(`/api/classes/${classId}`);
+                const classObj = await classResponse.json();
+                
+                // Find the specific month
+                const month = classObj.months.find(m => m.yearMonth === yearMonth);
+                
+                if (!month) {
+                    document.getElementById('monthInfo').innerHTML = '<p>Month not found</p>';
+                    return;
+                }
+
+                // Update page title and info
+                document.getElementById('pageTitle').textContent = `Manage ${month.displayName}`;
+                document.getElementById('monthInfo').innerHTML = `
+                    <h2>${month.displayName}</h2>
+                    <p><strong>Class:</strong> ${classObj.className}</p>
+                    <p><strong>Status:</strong> ${month.released ? '✅ Released' : '⏳ Draft'}</p>
+                    <p><strong>Videos:</strong> ${month.videoIds.length}</p>
+                    <div>
+                        ${month.released ? 
+                            `<button class="btn btn-warning" onclick="unreleaseMonth()">Unrelease Month</button>` :
+                            `<button class="btn btn-success" onclick="releaseMonth()">Release Month</button>`
+                        }
+                    </div>
+                `;
+
+                // Load videos for this month
+                loadMonthVideos();
+
+            } catch (error) {
+                document.getElementById('monthInfo').innerHTML = '<p>Error loading class information</p>';
+                console.error('Error:', error);
+            }
+        }
+
+        async function loadMonthVideos() {
+            try {
+                const response = await fetch(`/api/classes/${classId}/months/${yearMonth}/videos`);
+                const videoIds = await response.json();
+                
+                const videosList = document.getElementById('videosList');
+                
+                if (videoIds.length === 0) {
+                    videosList.innerHTML = '<p>No videos in this month yet.</p>';
+                    return;
+                }
+                
+                // For each video ID, get video details
+                const videoPromises = videoIds.map(videoId => 
+                    fetch(`/api/videos/${videoId}`).then(res => res.ok ? res.json() : null)
+                );
+                
+                const videos = await Promise.all(videoPromises);
+                
+                videosList.innerHTML = videos.map((video, index) => 
+                    video ? `
+                        <div class="video-item">
+                            <strong>${video.videoName}</strong>
+                            <p>${video.description}</p>
+                            <small>Size: ${(video.fileSize / (1024*1024)).toFixed(2)} MB</small>
+                            <button class="btn btn-danger" onclick="removeVideo('${videoIds[index]}')">Remove</button>
+                            <a href="watch.html?id=${video.id}" class="btn btn-primary">Watch</a>
+                        </div>
+                    ` : `<div class="video-item">Video not found: ${videoIds[index]}</div>`
+                ).join('');
+
+            } catch (error) {
+                document.getElementById('videosList').innerHTML = '<p>Error loading videos</p>';
+                console.error('Error:', error);
+            }
+        }
+
+        async function addVideoToMonth() {
+            const videoId = document.getElementById('videoId').value.trim();
+            if (!videoId) {
+                alert('Please enter a video ID');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/classes/${classId}/months/${yearMonth}/videos/${videoId}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    alert('Video added successfully!');
+                    document.getElementById('videoId').value = '';
+                    loadMonthVideos();
+                    loadClassInfo(); // Refresh month info
+                } else {
+                    alert('Error adding video');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function removeVideo(videoId) {
+            if (confirm('Remove this video from the month?')) {
+                try {
+                    const response = await fetch(`/api/classes/${classId}/months/${yearMonth}/videos/${videoId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        loadMonthVideos();
+                        loadClassInfo(); // Refresh month info
+                    } else {
+                        alert('Error removing video');
+                    }
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            }
+        }
+
+        async function releaseMonth() {
+            try {
+                const response = await fetch(`/api/classes/${classId}/months/${yearMonth}/release`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    alert('Month released successfully!');
+                    loadClassInfo();
+                } else {
+                    alert('Error releasing month');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function unreleaseMonth() {
+            try {
+                const response = await fetch(`/api/classes/${classId}/months/${yearMonth}/unrelease`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    alert('Month unreleased successfully!');
+                    loadClassInfo();
+                } else {
+                    alert('Error unreleasing month');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
