@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card { border: 1px solid #ddd; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        .card h3 { margin: 0 0 10px 0; color: #333; }
+        .card p { margin: 5px 0; color: #666; }
+        .status-draft { border-left: 4px solid #ffc107; }
+        .status-active { border-left: 4px solid #28a745; }
+        .status-inactive { border-left: 4px solid #6c757d; }
+        .btn { padding: 8px 16px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .month-list { margin: 10px 0; }
+        .month-item { background: #f8f9fa; padding: 8px; margin: 5px 0; border-radius: 4px; }
+        .month-released { border-left: 3px solid #28a745; }
+        .month-draft { border-left: 3px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Class Management</h1>
+        
+        <div style="margin: 20px 0;">
+            <button class="btn btn-primary" onclick="showCreateForm()">Create New Class</button>
+            <button class="btn btn-success" onclick="loadClasses()">Refresh List</button>
+        </div>
+
+        <!-- Create Class Form -->
+        <div id="createForm" style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3>Create New Class</h3>
+            <form id="classForm">
+                <div style="margin: 10px 0;">
+                    <label>Class Name:</label>
+                    <input type="text" id="className" required style="width: 300px; padding: 8px;">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Description:</label>
+                    <textarea id="classDescription" required style="width: 300px; padding: 8px; height: 80px;"></textarea>
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Instructor ID:</label>
+                    <input type="text" id="instructorId" value="user123" required style="width: 200px; padding: 8px;">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Monthly Price ($):</label>
+                    <input type="number" id="monthlyPrice" value="29.99" step="0.01" required style="width: 150px; padding: 8px;">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Start Month:</label>
+                    <input type="month" id="startMonth" required style="padding: 8px;">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Duration (months):</label>
+                    <input type="number" id="durationMonths" value="3" min="1" required style="width: 100px; padding: 8px;">
+                </div>
+                <button type="submit" class="btn btn-success">Create Class</button>
+                <button type="button" class="btn btn-danger" onclick="hideCreateForm()">Cancel</button>
+            </form>
+        </div>
+
+        <!-- Classes List -->
+        <div id="classesList">
+            <p>Loading classes...</p>
+        </div>
+    </div>
+
+    <script>
+        // Load classes when page loads
+        loadClasses();
+
+        // Set default start month to current month
+        document.getElementById('startMonth').value = new Date().toISOString().slice(0, 7);
+
+        function showCreateForm() {
+            document.getElementById('createForm').style.display = 'block';
+        }
+
+        function hideCreateForm() {
+            document.getElementById('createForm').style.display = 'none';
+        }
+
+        // Create class form handler
+        document.getElementById('classForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const classData = {
+                className: document.getElementById('className').value,
+                description: document.getElementById('classDescription').value,
+                instructorId: document.getElementById('instructorId').value,
+                monthlyPrice: parseFloat(document.getElementById('monthlyPrice').value),
+                startMonth: document.getElementById('startMonth').value, // Will be converted to YearMonth
+                durationMonths: parseInt(document.getElementById('durationMonths').value)
+            };
+
+            try {
+                const response = await fetch('/api/classes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(classData)
+                });
+
+                if (response.ok) {
+                    const newClass = await response.json();
+                    alert('Class created successfully!');
+                    hideCreateForm();
+                    document.getElementById('classForm').reset();
+                    loadClasses();
+                } else {
+                    alert('Error creating class');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        // Load all classes
+        async function loadClasses() {
+            try {
+                const response = await fetch('/api/classes');
+                const classes = await response.json();
+                
+                const classesList = document.getElementById('classesList');
+                classesList.innerHTML = '';
+                
+                if (classes.length === 0) {
+                    classesList.innerHTML = '<p>No classes found. Create your first class!</p>';
+                    return;
+                }
+                
+                classes.forEach(classObj => {
+                    const statusClass = `status-${classObj.status.toLowerCase()}`;
+                    const card = document.createElement('div');
+                    card.className = `card ${statusClass}`;
+                    
+                    card.innerHTML = `
+                        <h3>${classObj.className}</h3>
+                        <p><strong>Status:</strong> ${classObj.status}</p>
+                        <p><strong>Price:</strong> $${classObj.monthlyPrice}/month</p>
+                        <p><strong>Duration:</strong> ${classObj.durationMonths} months (${classObj.startMonth} to ${classObj.startMonth.substring(0, 7)}-${parseInt(classObj.startMonth.substring(5, 7)) + classObj.durationMonths - 1})</p>
+                        <p>${classObj.description}</p>
+                        
+                        <div class="month-list">
+                            <strong>Months:</strong>
+                            ${classObj.months.map(month => `
+                                <div class="month-item ${month.released ? 'month-released' : 'month-draft'}">
+                                    ${month.displayName} 
+                                    (${month.videoIds.length} videos)
+                                    ${month.released ? '✅ Released' : '⏳ Draft'}
+                                    <button class="btn btn-primary" onclick="viewClassMonth('${classObj.id}', '${month.yearMonth}')">Manage</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-success" onclick="updateStatus('${classObj.id}', 'ACTIVE')">Activate</button>
+                            <button class="btn btn-warning" onclick="updateStatus('${classObj.id}', 'INACTIVE')">Deactivate</button>
+                            <button class="btn btn-primary" onclick="extendClass('${classObj.id}')">Extend</button>
+                            <button class="btn btn-danger" onclick="deleteClass('${classObj.id}')">Delete</button>
+                        </div>
+                    `;
+                    
+                    classesList.appendChild(card);
+                });
+            } catch (error) {
+                document.getElementById('classesList').innerHTML = '<p>Error loading classes</p>';
+                console.error('Error:', error);
+            }
+        }
+
+        // Update class status
+        async function updateStatus(classId, status) {
+            if (confirm(`Change class status to ${status}?`)) {
+                try {
+                    const response = await fetch(`/api/classes/${classId}/status?status=${status}`, {
+                        method: 'PATCH'
+                    });
+                    
+                    if (response.ok) {
+                        loadClasses();
+                    } else {
+                        alert('Error updating status');
+                    }
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            }
+        }
+
+        // Extend class duration
+        async function extendClass(classId) {
+            const months = prompt('How many additional months?', '1');
+            if (months && parseInt(months) > 0) {
+                try {
+                    const response = await fetch(`/api/classes/${classId}/extend?additionalMonths=${months}`, {
+                        method: 'PATCH'
+                    });
+                    
+                    if (response.ok) {
+                        loadClasses();
+                    } else {
+                        alert('Error extending class');
+                    }
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            }
+        }
+
+        // Delete class
+        async function deleteClass(classId) {
+            if (confirm('Are you sure you want to delete this class?')) {
+                try {
+                    const response = await fetch(`/api/classes/${classId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        loadClasses();
+                    } else {
+                        alert('Error deleting class');
+                    }
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            }
+        }
+
+        // View class month details
+        function viewClassMonth(classId, yearMonth) {
+            window.location.href = `class-month.html?classId=${classId}&yearMonth=${yearMonth}`;
+        }
+    </script>
+</body>
+</html>

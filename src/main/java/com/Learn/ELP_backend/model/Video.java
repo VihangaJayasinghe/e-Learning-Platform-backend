@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -23,7 +26,11 @@ public class Video {
     private String fileName;
     private Long fileSize;
     private String contentType;
-    private LocalDateTime uploadDate;
-    private String courseId;
+    
+    @Builder.Default
+    private LocalDateTime uploadDate = LocalDateTime.now();
+    
     private String uploadedBy;
+    @JsonIgnore
+    private String courseId;
 }
