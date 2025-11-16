@@ -44,7 +44,6 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody User user) {
-            //helo
         return ResponseEntity.ok(userService.VerifyUser(user));
     }
 
