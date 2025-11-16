@@ -11,6 +11,6 @@ public class StudentController {
 @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     @GetMapping("/access")
     public String studentAccess() {
-        return "Student Access Granted";
+        return "Student Access Granted....";
     }
 }

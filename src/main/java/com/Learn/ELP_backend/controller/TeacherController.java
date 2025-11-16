@@ -11,6 +11,6 @@ public class TeacherController {
 @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @GetMapping("/access")
     public String teacherAccess() {
-        return "Teacher Access Granted";
+        return "Teacher Access Granted.....";
     }
 }
