@@ -3,6 +3,7 @@ package com.Learn.ELP_backend.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.Learn.ELP_backend.model.Documents;
@@ -10,6 +11,7 @@ import com.Learn.ELP_backend.repository.DocumentRepository;
 import com.Learn.ELP_backend.service.CloudinaryStorageService;
 import com.Learn.ELP_backend.service.DocumentService;
 
+@Service
 public class DocumentServiceImpl implements DocumentService{
 @Autowired
 private DocumentRepository documentRepository;
