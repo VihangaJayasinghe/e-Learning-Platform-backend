@@ -25,7 +25,7 @@ import com.Learn.ELP_backend.service.UserService;
 public class UserController {
     @Autowired
     private UserService userService;
-    @PostMapping("/register")//this temporary for register users with adding roles commonly used for register admin accounts also we can use this for admin operations like add teachers admin and students manually
+    @PostMapping("/register")//this temporary for register users with adding roles. commonly used for register admin accounts also we can use this for admin dashboard operations like add teachers admin and students
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         User registeredUser = userService.RegisterUser(user);
         return ResponseEntity.ok(registeredUser);
