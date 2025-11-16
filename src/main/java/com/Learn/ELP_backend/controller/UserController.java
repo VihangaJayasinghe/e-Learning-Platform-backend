@@ -69,12 +69,9 @@ public class UserController {
     }
     
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO, 
-                                          Principal principal) {
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO, Principal principal) {
         try {
-            userService.changePassword(principal.getName(), 
-                                     changePasswordDTO.getCurrentPassword(), 
-                                     changePasswordDTO.getNewPassword());
+            userService.changePassword(principal.getName(), changePasswordDTO.getCurrentPassword(), changePasswordDTO.getNewPassword());
             return ResponseEntity.ok("Password changed successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

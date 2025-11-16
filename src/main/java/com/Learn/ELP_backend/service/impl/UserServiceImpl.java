@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Email already exists");
         }
 
-        // Convert DTO to User entity
+        // Convert DTO to entity
         User user = new User();
         user.setUsername(teacherDTO.getUsername());
         user.setPassword(passwordEncoder.encode(teacherDTO.getPassword()));
