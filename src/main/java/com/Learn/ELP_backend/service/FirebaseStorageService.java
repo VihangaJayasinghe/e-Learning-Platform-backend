@@ -15,7 +15,7 @@ import java.util.UUID;
 @Service
 public class FirebaseStorageService {
 
-    @Autowired
+    //@Autowired
     private Storage firebaseStorage;
 
     // Replace with your actual bucket name from Firebase console
