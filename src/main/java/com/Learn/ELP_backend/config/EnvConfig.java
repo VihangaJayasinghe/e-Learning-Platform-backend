@@ -17,6 +17,6 @@ public class EnvConfig {
         System.setProperty("EMAIL_USERNAME", dotenv.get("EMAIL_USERNAME"));
         System.setProperty("EMAIL_PASSWORD", dotenv.get("EMAIL_PASSWORD"));
         
-        System.out.println("✅ Environment variables loaded from .env");
+        System.out.println("Environment variables loaded from .env");
     }
 }
