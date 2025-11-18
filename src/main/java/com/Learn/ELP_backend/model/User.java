@@ -32,5 +32,5 @@ public class User {
     private String passwordResetToken;
     private LocalDateTime passwordResetTokenExpiry;
     private LocalDateTime lastpasswordChange;
- 
+
 }
