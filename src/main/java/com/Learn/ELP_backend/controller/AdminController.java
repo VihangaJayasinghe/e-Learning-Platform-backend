@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Learn.ELP_backend.model.User;
+import com.Learn.ELP_backend.model.Video;
 import com.Learn.ELP_backend.service.AdminSecrity;
 import com.Learn.ELP_backend.service.AdminService;
+import com.Learn.ELP_backend.service.VideoService;
 @RestController
 @RequestMapping("/api/admins")
 
@@ -27,6 +29,8 @@ public class AdminController {
     private AdminService adminService;
     @Autowired
     private AdminSecrity adminSecrity;
+    @Autowired
+    private VideoService videoService;
 
  @GetMapping("/users")
     public ResponseEntity<?> getAll() {
@@ -130,5 +134,55 @@ public ResponseEntity<?> delete(
     }
 }
 
+
+ @GetMapping("/videos")
+    public ResponseEntity<?> getAllVideos() {
+        try {
+            List<Video> videos = videoService.getAllVideos();
+            return ResponseEntity.ok(videos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving videos: " + e.getMessage());
+        }
+    }
+
+@DeleteMapping("/videos/{id}/{key}")
+    public ResponseEntity<?> deleteVideo(@PathVariable String id, @PathVariable String key) {
+        try {
+            adminSecrity.validateKey(key);
+            videoService.deleteVideo(id);
+            return ResponseEntity.ok("Video with ID '" + id + "' deleted successfully");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED)
+                    .body("Invalid security key: " + e.getMessage());
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(HttpStatus.SC_NOT_FOUND)
+                        .body("Video not found with ID: " + id);
+            }
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error deleting video: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error deleting video: " + e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/videos/uploadedBy/{username}")
+    public ResponseEntity<?> getVideosByUploader(@PathVariable String username) {
+        try {
+            List<Video> videos = videoService.getVideosByUploadedBy(username);
+            if (videos != null && !videos.isEmpty()) {
+                return ResponseEntity.ok(videos);
+            } else {
+                return ResponseEntity.status(HttpStatus.SC_NOT_FOUND)
+                        .body("No videos found uploaded by user: " + username);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving videos: " + e.getMessage());
+        }
+    }
 
 }
