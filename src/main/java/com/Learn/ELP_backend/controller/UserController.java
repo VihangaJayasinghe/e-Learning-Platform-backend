@@ -3,6 +3,7 @@ package com.Learn.ELP_backend.controller;
 import java.security.Principal;
 import java.security.Provider.Service;
 
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,16 +32,42 @@ public class UserController {
         return ResponseEntity.ok(registeredUser);
     }
     @PostMapping("/register/student")
-    public ResponseEntity<User> registerStudent(@RequestBody StudentRegisterDTO studentDTO) {
+public ResponseEntity<?> registerStudent(@RequestBody StudentRegisterDTO studentDTO) {
+    try {
         User registeredStudent = userService.registerStudent(studentDTO);
         return ResponseEntity.ok(registeredStudent);
+    } catch (RuntimeException e) {
+        if (e.getMessage().contains("Username already exists")) {
+            return ResponseEntity.status(HttpStatus.SC_CONFLICT)
+                .body("Username already exists");
+        } else if (e.getMessage().contains("Email already exists")) {
+            return ResponseEntity.status(HttpStatus.SC_CONFLICT)
+                .body("Email already exists");
+        } else {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                .body("Registration failed: " + e.getMessage());
+        }
     }
+}
 
-    @PostMapping("/register/teacher")
-    public ResponseEntity<User> registerTeacher(@RequestBody TeacherRegisterDTO teacherDTO) {
+@PostMapping("/register/teacher")
+public ResponseEntity<?> registerTeacher(@RequestBody TeacherRegisterDTO teacherDTO) {
+    try {
         User registeredTeacher = userService.registerTeacher(teacherDTO);
         return ResponseEntity.ok(registeredTeacher);
+    } catch (RuntimeException e) {
+        if (e.getMessage().contains("Username already exists")) {
+            return ResponseEntity.status(HttpStatus.SC_CONFLICT)
+                .body("Username already exists");
+        } else if (e.getMessage().contains("Email already exists")) {
+            return ResponseEntity.status(HttpStatus.SC_CONFLICT)
+                .body("Email already exists");
+        } else {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                .body("Registration failed: " + e.getMessage());
+        }
     }
+}
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody User user) {
