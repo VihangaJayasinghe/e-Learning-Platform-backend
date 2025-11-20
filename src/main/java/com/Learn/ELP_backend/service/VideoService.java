@@ -10,4 +10,5 @@ public interface VideoService {
     Video getVideoById(String id);
     void deleteVideo(String id);
     Video uploadTestVideo(Video video); // For testing without file upload
+    List<Video> getVideosByUploadedBy(String uploadedBy);
 }
