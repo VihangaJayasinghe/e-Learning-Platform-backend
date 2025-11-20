@@ -66,6 +66,8 @@ public class UserServiceImpl implements UserService {
 
         User user = new User();
         user.setUsername(studentDTO.getUsername());
+        user.setFirstname(studentDTO.getFirstname());
+        user.setLastname(studentDTO.getLastname());
         user.setPassword(passwordEncoder.encode(studentDTO.getPassword()));
         user.setEmail(studentDTO.getEmail());
         user.setRole("STUDENT");
@@ -86,6 +88,8 @@ public class UserServiceImpl implements UserService {
         // Convert DTO to entity
         User user = new User();
         user.setUsername(teacherDTO.getUsername());
+        user.setFirstname(teacherDTO.getFirstname());
+        user.setLastname(teacherDTO.getLastname());
         user.setPassword(passwordEncoder.encode(teacherDTO.getPassword()));
         user.setEmail(teacherDTO.getEmail());
         user.setRole("TEACHER");
