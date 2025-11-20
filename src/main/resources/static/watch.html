@@ -6,6 +6,7 @@
     <title>Watch Video - E-Learning Platform</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
+        /* Your existing CSS remains the same */
         * {
             margin: 0;
             padding: 0;
@@ -548,6 +549,8 @@
         let currentPlaybackSpeed = 1;
         let currentQuality = 'auto';
         let activeMenu = null;
+        let userSelectedQuality = 'auto'; // Track user's explicit selection
+        let isAutoMode = true; // Track if we're in auto mode
 
         // DOM Elements
         const videoPlayer = document.getElementById('videoPlayer');
@@ -737,7 +740,7 @@
                     availableLevels = data.levels;
                     populateQualityMenu();
                     hideLoading();
-                    showQualityBadge('Auto');
+                    updateUIFromCurrentLevel();
                 });
 
                 hls.on(Hls.Events.LEVEL_LOADED, function(event, data) {
@@ -745,11 +748,8 @@
                 });
 
                 hls.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
-                    const level = availableLevels[data.level];
-                    if (level && currentQuality === 'auto') {
-                        const qualityText = getQualityLabel(level);
-                        showQualityBadge(qualityText);
-                    }
+                    console.log('Level switched to:', data.level);
+                    updateUIFromCurrentLevel();
                 });
 
                 hls.on(Hls.Events.ERROR, function(event, data) {
@@ -783,6 +783,7 @@
                 const qualityOption = document.createElement('div');
                 qualityOption.className = 'quality-option';
                 qualityOption.onclick = () => setQuality(level.height + 'p');
+                qualityOption.dataset.height = level.height;
                 
                 const resolution = getQualityLabel(level);
                 const bitrate = ` ${(level.bitrate / 1000).toFixed(0)} kbps`;
@@ -814,34 +815,75 @@
             
             if (quality === 'auto') {
                 hls.currentLevel = -1;
-                currentQuality = 'auto';
-                showQualityBadge('Auto');
-                updateQualitySelection('auto');
+                userSelectedQuality = 'auto';
+                isAutoMode = true;
+                updateUIFromCurrentLevel();
             } else {
-                // Find the level that matches the selected quality
+                // Find the closest level that matches the selected quality
                 const targetHeight = parseInt(quality);
-                const levelIndex = availableLevels.findIndex(level => level.height === targetHeight);
+                const levelIndex = findClosestLevelIndex(targetHeight);
                 
                 if (levelIndex !== -1) {
                     hls.currentLevel = levelIndex;
-                    currentQuality = quality;
-                    showQualityBadge(quality);
-                    updateQualitySelection(quality);
+                    userSelectedQuality = quality;
+                    isAutoMode = false;
+                    updateUIFromCurrentLevel();
                 }
             }
         }
 
-        function updateQualitySelection(selectedQuality) {
+        function findClosestLevelIndex(targetHeight) {
+            let closestIndex = -1;
+            let smallestDiff = Infinity;
+            
+            availableLevels.forEach((level, index) => {
+                const diff = Math.abs(level.height - targetHeight);
+                if (diff < smallestDiff) {
+                    smallestDiff = diff;
+                    closestIndex = index;
+                }
+            });
+            
+            return closestIndex;
+        }
+
+        function updateUIFromCurrentLevel() {
+            if (!hls) return;
+            
+            const currentLevel = hls.currentLevel;
+            let qualityText = 'Auto';
+            
+            if (currentLevel !== -1 && availableLevels[currentLevel]) {
+                const level = availableLevels[currentLevel];
+                qualityText = getQualityLabel(level);
+            }
+            
+            // Update badge
+            showQualityBadge(qualityText);
+            
+            // Update menu selection
+            updateQualitySelection();
+        }
+
+        function updateQualitySelection() {
+            if (!hls) return;
+            
+            const currentLevel = hls.currentLevel;
+            
             // Update auto option
             const autoOption = qualityMenu.querySelector('.quality-option:first-child');
-            autoOption.classList.toggle('selected', selectedQuality === 'auto');
-            autoOption.querySelector('.checkmark').textContent = selectedQuality === 'auto' ? '✓' : '';
+            const isAutoSelected = isAutoMode;
+            autoOption.classList.toggle('selected', isAutoSelected);
+            autoOption.querySelector('.checkmark').textContent = isAutoSelected ? '✓' : '';
 
             // Update quality options
             const qualityOptionElements = qualityOptions.querySelectorAll('.quality-option');
             qualityOptionElements.forEach(option => {
-                const resolution = option.querySelector('.resolution').textContent;
-                const isSelected = resolution === selectedQuality;
+                const optionHeight = parseInt(option.dataset.height);
+                const isSelected = !isAutoMode && currentLevel !== -1 && 
+                                 availableLevels[currentLevel] && 
+                                 Math.abs(availableLevels[currentLevel].height - optionHeight) < 10;
+                
                 option.classList.toggle('selected', isSelected);
                 option.querySelector('.checkmark').textContent = isSelected ? '✓' : '';
             });
@@ -870,7 +912,7 @@
             });
         }
 
-        // Player Control Functions (same as before)
+        // Player Control Functions
         function togglePlay() {
             if (videoPlayer.paused) {
                 videoPlayer.play();
