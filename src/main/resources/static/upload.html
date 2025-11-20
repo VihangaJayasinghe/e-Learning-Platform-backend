@@ -12,16 +12,197 @@
         button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
         button:disabled { background: #6c757d; cursor: not-allowed; }
         .back-link { display: inline-block; margin-bottom: 20px; color: #007bff; text-decoration: none; }
+        
+        /* Progress Bar Styles */
+        .progress-container {
+            margin: 20px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar {
+            height: 20px;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+            position: relative;
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        /* Status indicators */
+        .status-info { 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin: 10px 0; 
+            display: none;
+        }
+        .status-uploading { 
+            background: #d1ecf1; 
+            border: 1px solid #bee5eb; 
+            color: #0c5460; 
+        }
+        .status-processing { 
+            background: #fff3cd; 
+            border: 1px solid #ffeaa7; 
+            color: #856404; 
+        }
+        .status-ready { 
+            background: #d4edda; 
+            border: 1px solid #c3e6cb; 
+            color: #155724; 
+        }
+        .status-error { 
+            background: #f8d7da; 
+            border: 1px solid #f5c6cb; 
+            color: #721c24; 
+        }
+        
+        /* File Info */
+        .file-info {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+        .file-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .stat-card {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        /* Step Indicators */
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            position: relative;
+        }
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #dee2e6;
+            z-index: 1;
+        }
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #dee2e6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 5px;
+            font-weight: bold;
+        }
+        .step.active .step-circle {
+            background: #007bff;
+        }
+        .step.completed .step-circle {
+            background: #28a745;
+        }
+        .step-label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .step.active .step-label {
+            color: #007bff;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <a href="index.html" class="back-link">← Back to Video Library</a>
     <h1>📤 Upload Video</h1>
     
+    <!-- Step Indicators -->
+    <div class="steps">
+        <div class="step active" id="step1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Select File</div>
+        </div>
+        <div class="step" id="step2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Uploading</div>
+        </div>
+        <div class="step" id="step3">
+            <div class="step-circle">3</div>
+            <div class="step-label">Processing</div>
+        </div>
+        <div class="step" id="step4">
+            <div class="step-circle">4</div>
+            <div class="step-label">Complete</div>
+        </div>
+    </div>
+    
     <form id="uploadForm">
         <div class="form-group">
             <label for="videoFile">Video File:</label>
             <input type="file" id="videoFile" accept="video/*" required>
+            <small>Supported formats: MP4, MOV, AVI, MKV (Max 100MB)</small>
+        </div>
+        
+        <!-- File Info Display -->
+        <div id="fileInfo" class="file-info">
+            <div class="file-info-item">
+                <span>File Name:</span>
+                <span id="fileName">-</span>
+            </div>
+            <div class="file-info-item">
+                <span>File Size:</span>
+                <span id="fileSize">-</span>
+            </div>
+            <div class="file-info-item">
+                <span>File Type:</span>
+                <span id="fileType">-</span>
+            </div>
         </div>
         
         <div class="form-group">
@@ -39,12 +220,185 @@
             <input type="text" id="courseId" placeholder="Enter course ID" required>
         </div>
         
+        <!-- Progress Bar -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-text" id="progressText">0%</div>
+            </div>
+        </div>
+        
+        <!-- Upload Stats -->
+        <div class="stats-grid" id="uploadStats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-value" id="uploadSpeed">0 KB/s</div>
+                <div class="stat-label">Upload Speed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="timeRemaining">--:--</div>
+                <div class="stat-label">Time Remaining</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="uploadedSize">0 MB</div>
+                <div class="stat-label">Uploaded</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalSize">0 MB</div>
+                <div class="stat-label">Total Size</div>
+            </div>
+        </div>
+        
         <button type="submit" id="uploadBtn">Upload Video</button>
     </form>
     
+    <!-- Status Messages -->
+    <div id="statusMessage" class="status-info"></div>
     <div id="message" style="margin-top: 20px;"></div>
 
     <script>
+        // Global variables for progress tracking
+        let uploadStartTime = null;
+        let uploadInterval = null;
+        
+        // File input change handler
+        document.getElementById('videoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                showFileInfo(file);
+            }
+        });
+        
+        function showFileInfo(file) {
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const fileType = document.getElementById('fileType');
+            
+            // Validate file size (100MB limit)
+            const maxSize = 100 * 1024 * 1024; // 100MB in bytes
+            if (file.size > maxSize) {
+                showMessage('File size exceeds 100MB limit. Please choose a smaller file.', 'error');
+                document.getElementById('videoFile').value = '';
+                fileInfo.style.display = 'none';
+                return;
+            }
+            
+            // Display file information
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileType.textContent = file.type || 'Unknown';
+            
+            fileInfo.style.display = 'block';
+            
+            // Auto-fill video name from filename (without extension)
+            if (!document.getElementById('videoName').value) {
+                const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+                document.getElementById('videoName').value = nameWithoutExt;
+            }
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function updateStep(stepNumber) {
+            // Reset all steps
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+            
+            // Activate current step and mark previous steps as completed
+            for (let i = 1; i <= stepNumber; i++) {
+                const step = document.getElementById('step' + i);
+                if (i === stepNumber) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.add('completed');
+                }
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = message;
+            statusDiv.className = `status-info status-${type}`;
+            statusDiv.style.display = 'block';
+        }
+        
+        function hideStatus() {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.style.display = 'none';
+        }
+        
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            const color = type === 'error' ? 'red' : (type === 'success' ? 'green' : 'blue');
+            messageDiv.innerHTML = `<p style="color: ${color};">${message}</p>`;
+        }
+        
+        function updateProgress(percentage, uploadedBytes, totalBytes) {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const progressContainer = document.getElementById('progressContainer');
+            
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = percentage.toFixed(1) + '%';
+            progressContainer.style.display = 'block';
+            
+            // Update stats
+            if (uploadStartTime) {
+                const currentTime = Date.now();
+                const elapsedTime = (currentTime - uploadStartTime) / 1000; // in seconds
+                const uploadSpeed = uploadedBytes / elapsedTime; // bytes per second
+                const remainingBytes = totalBytes - uploadedBytes;
+                const timeRemaining = remainingBytes / uploadSpeed; // in seconds
+                
+                document.getElementById('uploadSpeed').textContent = formatSpeed(uploadSpeed);
+                document.getElementById('timeRemaining').textContent = formatTime(timeRemaining);
+                document.getElementById('uploadedSize').textContent = formatFileSize(uploadedBytes);
+                document.getElementById('totalSize').textContent = formatFileSize(totalBytes);
+            }
+        }
+        
+        function formatSpeed(bytesPerSecond) {
+            if (bytesPerSecond < 1024) {
+                return bytesPerSecond.toFixed(0) + ' B/s';
+            } else if (bytesPerSecond < 1024 * 1024) {
+                return (bytesPerSecond / 1024).toFixed(1) + ' KB/s';
+            } else {
+                return (bytesPerSecond / (1024 * 1024)).toFixed(1) + ' MB/s';
+            }
+        }
+        
+        function formatTime(seconds) {
+            if (seconds === Infinity || isNaN(seconds)) return '--:--';
+            
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        function startProgressTracking(totalBytes) {
+            uploadStartTime = Date.now();
+            document.getElementById('uploadStats').style.display = 'grid';
+            
+            // Update progress every 100ms for smooth animation
+            uploadInterval = setInterval(() => {
+                // This will be updated by the XMLHttpRequest progress event
+            }, 100);
+        }
+        
+        function stopProgressTracking() {
+            if (uploadInterval) {
+                clearInterval(uploadInterval);
+                uploadInterval = null;
+            }
+        }
+        
+        // Form submission
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -56,46 +410,145 @@
             const messageDiv = document.getElementById('message');
             
             if (!fileInput.files[0]) {
-                messageDiv.innerHTML = '<p style="color: red;">Please select a video file</p>';
+                showMessage('Please select a video file', 'error');
                 return;
             }
             
+            const file = fileInput.files[0];
             const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
+            formData.append('file', file);
             formData.append('name', videoName);
             formData.append('description', description);
-            formData.append('courseId', courseId);
             
+            // Reset UI
             uploadBtn.disabled = true;
             uploadBtn.textContent = 'Uploading...';
-            messageDiv.innerHTML = '<p>Uploading video, please wait...</p>';
+            hideStatus();
+            showMessage('', '');
+            updateStep(2);
+            showStatus('🔄 Starting upload...', 'uploading');
             
             try {
-                const response = await fetch('/api/videos/upload', {
-                    method: 'POST',
-                    body: formData
+                // Start progress tracking
+                startProgressTracking(file.size);
+                
+                // Use XMLHttpRequest for progress tracking (since fetch doesn't support upload progress)
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        const percentage = (e.loaded / e.total) * 100;
+                        updateProgress(percentage, e.loaded, e.total);
+                        
+                        // Update status message based on progress
+                        if (percentage < 100) {
+                            showStatus(`🔄 Uploading: ${percentage.toFixed(1)}% complete`, 'uploading');
+                        }
+                    }
                 });
                 
-                if (response.ok) {
-                    const video = await response.json();
-                    messageDiv.innerHTML = `
-                        <p style="color: green;">
+                xhr.addEventListener('load', function() {
+                    stopProgressTracking();
+                    
+                    if (xhr.status === 200) {
+                        const video = JSON.parse(xhr.responseText);
+                        
+                        updateStep(3);
+                        showStatus('⏳ Video uploaded! Processing for adaptive streaming...', 'processing');
+                        updateProgress(100, file.size, file.size);
+                        
+                        showMessage(`
                             ✅ Video uploaded successfully!<br>
                             <a href="watch.html?id=${video.id}">Watch Video</a> | 
                             <a href="index.html">View All Videos</a>
-                        </p>
-                    `;
-                    document.getElementById('uploadForm').reset();
-                } else {
-                    messageDiv.innerHTML = '<p style="color: red;">Error uploading video</p>';
-                }
+                        `, 'success');
+                        
+                        // Start polling for processing status
+                        if (video.status === 'PROCESSING') {
+                            pollProcessingStatus(video.id);
+                        } else {
+                            updateStep(4);
+                            showStatus('✅ Video processing complete! Ready to watch.', 'ready');
+                        }
+                        
+                        document.getElementById('uploadForm').reset();
+                        document.getElementById('fileInfo').style.display = 'none';
+                        document.getElementById('progressContainer').style.display = 'none';
+                        document.getElementById('uploadStats').style.display = 'none';
+                        
+                    } else {
+                        handleUploadError('Upload failed: ' + xhr.statusText);
+                    }
+                });
+                
+                xhr.addEventListener('error', function() {
+                    stopProgressTracking();
+                    handleUploadError('Upload failed due to network error');
+                });
+                
+                xhr.addEventListener('timeout', function() {
+                    stopProgressTracking();
+                    handleUploadError('Upload timed out');
+                });
+                
+                // Configure and send request
+                xhr.open('POST', '/api/videos/upload');
+                xhr.timeout = 300000; // 5 minutes timeout
+                xhr.send(formData);
+                
             } catch (error) {
-                messageDiv.innerHTML = '<p style="color: red;">Error uploading video: ' + error.message + '</p>';
-            } finally {
-                uploadBtn.disabled = false;
-                uploadBtn.textContent = 'Upload Video';
+                stopProgressTracking();
+                handleUploadError('Error uploading video: ' + error.message);
             }
         });
+        
+        function handleUploadError(errorMessage) {
+            showMessage(errorMessage, 'error');
+            showStatus('❌ Upload failed', 'error');
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('uploadBtn').textContent = 'Upload Video';
+            updateStep(1);
+        }
+        
+        async function pollProcessingStatus(videoId) {
+            updateStep(3);
+            showStatus('⏳ Processing video for adaptive streaming (this may take a few minutes)...', 'processing');
+            
+            const checkStatus = async () => {
+                try {
+                    const response = await fetch(`/api/videos/${videoId}/status`);
+                    if (response.ok) {
+                        const status = await response.json();
+                        
+                        if (status.isReady) {
+                            updateStep(4);
+                            showStatus('✅ Video processing complete! Adaptive streaming is now available.', 'ready');
+                            
+                            // Update the watch link
+                            const messageDiv = document.getElementById('message');
+                            const currentHtml = messageDiv.innerHTML;
+                            messageDiv.innerHTML = currentHtml.replace(
+                                `href="watch.html?id=${videoId}"`,
+                                `href="watch.html?id=${videoId}" style="font-weight: bold; color: green;"`
+                            );
+                        } else {
+                            // Still processing, check again in 5 seconds
+                            setTimeout(checkStatus, 5000);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking status:', error);
+                    // Continue polling even if there's an error
+                    setTimeout(checkStatus, 10000);
+                }
+            };
+            
+            // Start polling
+            checkStatus();
+        }
+        
+        // Initialize
+        updateStep(1);
     </script>
 </body>
 </html>
