@@ -9,28 +9,41 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
 @Document(collection = "users")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
+@Id
+private String id;
+private String username;
+private String password;
+private String role;
+private String email;
+private String qualification;
+private Integer yearsOfExperience;
+private String subjectExpertise;
+private String bio;
+private String AuthProvider;
+private String passwordResetToken;
+private LocalDateTime passwordResetTokenExpiry;
+private LocalDateTime lastPasswordChange;
 
 
-    @Id
-    private String id;
-    private String username;
-    private String password;
-    private String role;
-    private String email;
-    private String qualification;
-    private String yearsOfExperience;
-    private String subjectExpertise;
-    private String department;
-    private String bio;
-    private String nic;
-    private String AuthProvider;
-    private String passwordResetToken;
-    private LocalDateTime passwordResetTokenExpiry;
-    private LocalDateTime lastpasswordChange;
+public void setUsername(String username) {
+        this.username = username;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
+    public void setRole(String role) {
+        this.role = role;
+    }
 
 }
