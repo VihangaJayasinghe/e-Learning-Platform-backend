@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Teal & Black Video Player</title>
+
+  <!-- Plyr CSS -->
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
+  <style>
+    body {
+      background-color: #0d0d0d;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Teal & black custom player */
+    .plyr {
+      border-radius: 16px;
+      overflow: hidden;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Controls background */
+    .plyr__controls {
+      background: rgba(0,0,0,0.6);
+    }
+
+    /* Progress bar */
+    .plyr__progress__container {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .plyr__progress--played {
+      background: #00e0c6 !important;
+    }
+
+    .plyr__progress__buffer {
+      background: rgba(0, 224, 198, 0.3) !important;
+    }
+
+    /* Time and icons */
+    .plyr__time, .plyr__control svg {
+      color: #00e0c6 !important;
+    }
+
+    /* Volume and progress sliders */
+    .plyr--full-ui input[type=range] {
+      color: #00e0c6 !important;
+    }
+
+    .plyr__menu__container .plyr__control--forward {
+      color: #00e0c6 !important;
+    }
+
+    /* Hover states */
+    .plyr__control:hover {
+      background: rgba(0, 224, 198, 0.1) !important;
+    }
+
+    .plyr__control--overlaid {
+      background: rgba(0, 224, 198, 0.8) !important;
+    }
+
+    .plyr__control--overlaid:hover {
+      background: #00e0c6 !important;
+    }
+
+    /* Quality badge */
+    .plyr__menu__container {
+      background: rgba(0, 0, 0, 0.9) !important;
+    }
+
+    .plyr__control[role=menuitemradio]:hover {
+      background: rgba(0, 224, 198, 0.2) !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Video Element -->
+  <video id="player" playsinline controls>
+    <!-- We'll set the source via JavaScript for HLS -->
+  </video>
+
+  <!-- Plyr JS -->
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+  <!-- HLS.js -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  
+  <script>
+    const video = document.getElementById('player');
+    
+    // Use Cloudinary HLS URL - replace .mp4 with .m3u8 for HLS streaming
+    const mp4Source = "https://res.cloudinary.com/ddacrl8vt/video/upload/sp_auto/v1763456446/elearning-videos/dv1o6oitzj1zjqbhzeoo.m3u8";
+    const hlsSource = mp4Source.replace('.mp4', '.m3u8');
+
+    console.log('Attempting to load HLS stream:', hlsSource);
+
+    // Initialize Plyr first
+    const player = new Plyr('#player', {
+      controls: [
+        'play', 
+        'progress', 
+        'current-time', 
+        'duration',
+        'mute', 
+        'volume', 
+        'settings', 
+        'fullscreen'
+      ],
+      settings: ['quality', 'speed'],
+      volume: 0.5,
+      muted: false,
+      quality: {
+        default: 480,
+        options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240]
+      }
+    });
+
+    // HLS.js setup
+    if (Hls.isSupported()) {
+      console.log('HLS.js is supported');
+      const hls = new Hls({
+        debug: false,
+        enableWorker: true,
+        lowLatencyMode: true,
+        backBufferLength: 90
+      });
+
+      hls.loadSource(hlsSource);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        console.log('HLS manifest parsed successfully');
+        // Auto-play is often blocked by browsers, so we'll let user start playback
+      });
+
+      hls.on(Hls.Events.ERROR, function(event, data) {
+        console.error('HLS error:', data);
+        if (data.fatal) {
+          switch(data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.log('Network error, trying to recover...');
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.log('Media error, recovering...');
+              hls.recoverMediaError();
+              break;
+            default:
+              console.log('Fatal error, cannot recover');
+              // Fallback to MP4
+              fallbackToMP4();
+              break;
+          }
+        }
+      });
+
+      // Update quality options when available
+      hls.on(Hls.Events.LEVEL_LOADED, function(event, data) {
+        console.log('Quality levels loaded');
+      });
+
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Native HLS support (Safari)
+      console.log('Using native HLS support');
+      video.src = hlsSource;
+      video.addEventListener('loadedmetadata', function() {
+        console.log('Native HLS loaded');
+      });
+    } else {
+      console.log('HLS not supported, falling back to MP4');
+      fallbackToMP4();
+    }
+
+    function fallbackToMP4() {
+      console.log('Falling back to MP4 source');
+      video.src = mp4Source;
+      const source = document.createElement('source');
+      source.src = mp4Source;
+      source.type = 'video/mp4';
+      video.appendChild(source);
+      video.load();
+    }
+
+    // Event listeners for debugging
+    player.on('ready', event => {
+      console.log('Plyr player is ready');
+    });
+
+    player.on('play', event => {
+      console.log('Video started playing');
+    });
+
+    player.on('error', event => {
+      console.error('Plyr error:', event.detail);
+    });
+
+    // Add error event listener to video element directly
+    video.addEventListener('error', function(e) {
+      console.error('Video element error:', e);
+      console.log('Video error code:', video.error ? video.error.code : 'unknown');
+    });
+
+    video.addEventListener('loadstart', function() {
+      console.log('Video load started');
+    });
+
+    video.addEventListener('loadeddata', function() {
+      console.log('Video data loaded');
+    });
+  </script>
+
+</body>
+</html>
