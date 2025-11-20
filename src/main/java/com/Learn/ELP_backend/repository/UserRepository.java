@@ -1,10 +1,17 @@
 package com.Learn.ELP_backend.repository;
 
-import com.Learn.ELP_backend.model.User;
+import java.util.List;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface UserRepository extends MongoRepository<User, String> {
+import com.Learn.ELP_backend.model.User;
+import com.google.common.base.Optional;
 
+public interface UserRepository extends MongoRepository<User,String> {
+
+    User findByUsernameContainingIgnoreCase(String username);
+    User deleteByUsername(String username);
+    List<User> findByRole(String role);
     User findByUsername(String username);
     User findByEmail(String email);
     User findByPasswordResetToken(String token);

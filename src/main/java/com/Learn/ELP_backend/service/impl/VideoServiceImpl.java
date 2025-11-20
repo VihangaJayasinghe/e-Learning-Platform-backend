@@ -76,4 +76,14 @@ public class VideoServiceImpl implements VideoService {
             }
         }
     }
+
+    @Override
+    public List<Video> getVideosByUploadedBy(String uploadedBy) {
+   try {
+            List<Video> videos = videoRepository.findByUploadedBy(uploadedBy);
+            return videos;
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving videos by uploader: " + e.getMessage());
+        }
+}
 }
