@@ -7,6 +7,8 @@ import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -20,8 +22,7 @@ public class Video {
     
     private String videoName;
     private String description;
-    private String firebaseUrl; // Original MP4 URL
-    private String playbackUrl; // HLS URL with sp_auto
+    private String firebaseUrl;
     private String fileName;
     private Long fileSize;
     private String contentType;
@@ -30,13 +31,6 @@ public class Video {
     private LocalDateTime uploadDate = LocalDateTime.now();
     
     private String uploadedBy;
+    @JsonIgnore
     private String courseId;
-    
-    // ABS-specific fields
-    private VideoStatus status;
-    private String processingJobId;
-    
-    public enum VideoStatus {
-        UPLOADED, PROCESSING, READY, FAILED
-    }
 }

@@ -7,9 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/videos")
@@ -27,27 +25,6 @@ public class VideoController {
         
         Video video = videoService.uploadVideo(file, name, description);
         return ResponseEntity.ok(video);
-    }
-
-    // Check processing status 
-    @GetMapping("/{id}/status")
-    public ResponseEntity<Map<String, Object>> getVideoStatus(@PathVariable String id) {
-        Video video = videoService.checkProcessingStatus(id);
-        
-        Map<String, Object> status = new HashMap<>();
-        status.put("videoId", id);
-        status.put("status", video.getStatus());
-        status.put("playbackUrl", video.getPlaybackUrl());
-        status.put("isReady", video.getStatus() == Video.VideoStatus.READY);
-        
-        return ResponseEntity.ok(status);
-    }
-
-    // Get all ready videos - FIXED
-    @GetMapping("/ready")
-    public ResponseEntity<List<Video>> getReadyVideos() {
-        List<Video> videos = videoService.getReadyVideos(); // Call service method
-        return ResponseEntity.ok(videos);
     }
 
     // Create test video (without file upload)
@@ -77,13 +54,13 @@ public class VideoController {
 
     // Get video by ID
     @GetMapping("/{id}")
-public ResponseEntity<Video> getVideoById(@PathVariable String id) {
-    Video video = videoService.getVideoById(id); // Good - uses service
-    if (video != null) {
-        return ResponseEntity.ok(video);
+    public ResponseEntity<Video> getVideoById(@PathVariable String id) {
+        Video video = videoService.getVideoById(id);
+        if (video != null) {
+            return ResponseEntity.ok(video);
+        }
+        return ResponseEntity.notFound().build();
     }
-    return ResponseEntity.notFound().build();
-}
 
     // Delete video
     @DeleteMapping("/{id}")
