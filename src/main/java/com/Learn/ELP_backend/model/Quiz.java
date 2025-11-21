@@ -19,9 +19,7 @@ import lombok.NoArgsConstructor;
 public class Quiz {
     @Id
     private String Id;
-    
-    private String classId;
-    private YearMonth yearMonth;
+
     private String quizTitle;
     private String description;
     private List<Question> questions;
@@ -30,6 +28,4 @@ public class Quiz {
     
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
-
-
 }
