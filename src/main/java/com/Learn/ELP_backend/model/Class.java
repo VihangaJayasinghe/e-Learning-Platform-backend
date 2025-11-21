@@ -88,15 +88,4 @@ public class Class {
                 .orElse(null);
     }
 
-    // Find quiz
-    public Quiz findQuiz(String yearMonth, String quizId) {
-        ClassMonth month = findMonth(yearMonth);
-        if (month == null) return null;
-
-        return month.getQuizzes()
-            .stream()
-            .filter(q -> q.getId().equals(quizId))
-            .findFirst()
-            .orElse(null);
-    }
 }
