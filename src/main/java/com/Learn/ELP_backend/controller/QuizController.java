@@ -1,56 +1,49 @@
 package com.Learn.ELP_backend.controller;
 
+import com.Learn.ELP_backend.model.Quiz;
+import com.Learn.ELP_backend.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.Learn.ELP_backend.model.Quiz;
-import com.Learn.ELP_backend.service.ClassService;
+import java.util.List;
 
 @RestController
-@RequestMapping("api/classes/{classId}/months/{yearMonth}/quizzes")
+@RequestMapping("/api/quizzes")
 public class QuizController {
 
-    @Autowired  
-    private ClassService classService;
+    @Autowired
+    private QuizService quizService;
 
     @PostMapping
-    public ResponseEntity<Quiz> addQuiz(
-            @PathVariable String classId,
-            @PathVariable String yearMonth,
-            @RequestBody Quiz quiz) {
-        
-        Quiz created = classService.addQuizToMonth(classId, yearMonth, quiz);
-            return ResponseEntity.ok(created);
+    public ResponseEntity<Quiz> createQuiz(@RequestBody Quiz quiz) {
+        return ResponseEntity.ok(quizService.createQuiz(quiz));
     }
-    
 
     @PutMapping("/{quizId}")
-    public ResponseEntity<Quiz> updateQuiz(
-        @PathVariable String classId,
-        @PathVariable String yearMonth,
-        @PathVariable String quizId,
-        @RequestBody Quiz quizUpdate) {
-
-    Quiz updated = classService.updateQuiz(classId, yearMonth, quizId, quizUpdate);
-    return ResponseEntity.ok(updated);
-}
-
+    public ResponseEntity<Quiz> updateQuiz(@PathVariable String quizId, @RequestBody Quiz quizUpdate) {
+        return ResponseEntity.ok(quizService.updateQuiz(quizId, quizUpdate));
+    }
 
     @DeleteMapping("/{quizId}")
-    public ResponseEntity<Void> deleteQuiz(
-        @PathVariable String classId,
-        @PathVariable String yearMonth,
-        @PathVariable String quizId) {
+    public ResponseEntity<Void> deleteQuiz(@PathVariable String quizId) {
+        quizService.deleteQuiz(quizId);
+        return ResponseEntity.ok().build();
+    }
 
-    classService.deleteQuiz(classId, yearMonth, quizId);
-    return ResponseEntity.ok().build();
-}
+    @GetMapping("/{quizId}")
+    public ResponseEntity<Quiz> getQuiz(@PathVariable String quizId) {
+        return ResponseEntity.ok(quizService.getQuizById(quizId));
+    }
 
+    @GetMapping("/class/{classId}")
+    public ResponseEntity<List<Quiz>> getQuizzesByClass(@PathVariable String classId) {
+        return ResponseEntity.ok(quizService.getQuizzesByClass(classId));
+    }
+
+    @GetMapping("/class/{classId}/month/{yearMonth}")
+    public ResponseEntity<List<Quiz>> getQuizzesByClassAndMonth(@PathVariable String classId,
+                                                                @PathVariable String yearMonth) {
+        return ResponseEntity.ok(quizService.getQuizzesByClassAndMonth(classId, yearMonth));
+    }
 }

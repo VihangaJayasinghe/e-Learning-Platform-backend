@@ -3,7 +3,6 @@ package com.Learn.ELP_backend.service.impl;
 import com.Learn.ELP_backend.model.Class;
 import com.Learn.ELP_backend.model.ClassMonth;
 import com.Learn.ELP_backend.model.ClassStatus;
-import com.Learn.ELP_backend.model.Quiz;
 import com.Learn.ELP_backend.repository.ClassRepository;
 import com.Learn.ELP_backend.service.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class ClassServiceImpl implements ClassService {
@@ -153,89 +151,4 @@ public class ClassServiceImpl implements ClassService {
         
         return month.getVideoIds();
     }
-
-
-    @Override
-    public Quiz addQuizToMonth(String classId, String yearMonth, Quiz quiz) {
-
-    Class classObj = getClassById(classId);
-    ClassMonth month = classObj.findMonth(yearMonth);
-
-    if (month == null)
-        throw new RuntimeException("Month not found");
-
-    quiz.setId(UUID.randomUUID().toString());
-
-    month.getQuizzes().add(quiz);
-
-    classRepository.save(classObj);
-
-    return quiz;
-    }
-
-
-    @Override
-    public Quiz updateQuiz(String classId, String yearMonth, String quizId, Quiz quizUpdate) {
-    // 1. Get the class
-    Class classObj = getClassById(classId);
-
-    // 2. Get the specific month
-    ClassMonth month = classObj.findMonth(yearMonth);
-    if (month == null) {
-        throw new RuntimeException("Month not found: " + yearMonth);
-    }
-
-    // 3. Find the quiz inside the month
-    Quiz existingQuiz = month.getQuizzes().stream()
-            .filter(q -> q.getId().equals(quizId))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Quiz not found: " + quizId));
-
-    // 4. Update fields (only non-null ones)
-    if (quizUpdate.getQuizTitle() != null) {
-        existingQuiz.setQuizTitle(quizUpdate.getQuizTitle());
-    }
-
-    if (quizUpdate.getDescription() != null) {
-        existingQuiz.setDescription(quizUpdate.getDescription());
-    }
-
-    if (quizUpdate.getQuestions() != null) {
-        existingQuiz.setQuestions(quizUpdate.getQuestions());
-    }
-
-    // 5. Save class back to DB
-    classRepository.save(classObj);
-
-    return existingQuiz;
-
-    }
-
-    
-    @Override
-    public void deleteQuiz(String classId, String yearMonth, String quizId) {
-    // 1. Get the class
-    Class classObj = getClassById(classId);
-
-    // 2. Get the month
-    ClassMonth month = classObj.findMonth(yearMonth);
-    if (month == null) {
-        throw new RuntimeException("Month not found: " + yearMonth);
-    }
-
-    // 3. Remove quiz by ID
-    boolean removed = month.getQuizzes().removeIf(q -> q.getId().equals(quizId));
-
-    if (!removed) {
-        throw new RuntimeException("Quiz not found: " + quizId);
-    }
-
-    // 4. Save
-    classRepository.save(classObj);
-}
-
-
-
-
-    
 }

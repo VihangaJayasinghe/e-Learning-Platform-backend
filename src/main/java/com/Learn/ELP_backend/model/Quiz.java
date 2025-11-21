@@ -18,7 +18,9 @@ import lombok.NoArgsConstructor;
 public class Quiz {
     @Id
     private String Id;
-
+    
+    private String classId;
+    private String yearMonth;
     private String quizTitle;
     private String description;
     private List<Question> questions;
