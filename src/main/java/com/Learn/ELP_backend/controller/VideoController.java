@@ -32,6 +32,7 @@ public class VideoController {
 
 
     // Get all videos
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<Video>> getAllVideos() {
         List<Video> videos = videoService.getAllVideos();
@@ -39,6 +40,7 @@ public class VideoController {
     }
 
     // Get video by ID
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN') or hasRole('STUDENT')")
     @GetMapping("/{id}")
     public ResponseEntity<Video> getVideoById(@PathVariable String id) {
         Video video = videoService.getVideoById(id);
@@ -49,6 +51,7 @@ public class VideoController {
     }
 
     // Delete video
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVideo(@PathVariable String id) {
         videoService.deleteVideo(id);
