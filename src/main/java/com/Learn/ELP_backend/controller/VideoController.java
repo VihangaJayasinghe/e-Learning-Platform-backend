@@ -29,24 +29,7 @@ public class VideoController {
         return ResponseEntity.ok(video);
     }
 
-    // Create test video (without file upload)
-    
-    @PostMapping("/test")
-    public ResponseEntity<Video> createTestVideo() {
-        Video testVideo = Video.builder()
-                .videoName("Test Video")
-                .description("This is a test video")
-                .firebaseUrl("https://firebasestorage.googleapis.com/v0/b/your-bucket/videos/test.mp4")
-                .fileName("test.mp4")
-                .fileSize(1048576L)
-                .contentType("video/mp4")
-                .uploadedBy("test-user")
-                .uploadDate(LocalDateTime.now())
-                .build();
-        
-        Video savedVideo = videoService.uploadTestVideo(testVideo);
-        return ResponseEntity.ok(savedVideo);
-    }
+
 
     // Get all videos
     @GetMapping
