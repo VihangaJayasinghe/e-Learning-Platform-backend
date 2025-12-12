@@ -47,9 +47,9 @@ public User getuserByName(String username) {
 }
 
 user2.setBio(user.getBio());
-user2.setDepartment(user.getDepartment());
 user2.setEmail(user.getEmail());
-user2.setNic(user.getNic());
+user2.setPassword(user.getPassword());
+user2.setUsername(user.getUsername());
 user2.setQualification(user.getQualification());
 user2.setRole(user.getRole());
 user2.setSubjectExpertise(user.getSubjectExpertise());

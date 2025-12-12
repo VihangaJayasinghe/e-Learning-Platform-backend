@@ -6,6 +6,7 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import com.Learn.ELP_backend.service.AdminSecrity;
 import com.Learn.ELP_backend.service.AdminService;
 import com.Learn.ELP_backend.service.VideoService;
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/admins")
 
 public class AdminController {
@@ -58,8 +60,6 @@ public ResponseEntity<?> getuserbyname(@PathVariable String username) {
                 .body("Error retrieving user: " + e.getMessage());
     }
 }
-
-
 
 
 

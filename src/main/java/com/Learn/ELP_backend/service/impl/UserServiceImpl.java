@@ -4,11 +4,9 @@ import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authorization.AuthenticatedAuthorizationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +17,11 @@ import com.Learn.ELP_backend.repository.UserRepository;
 import com.Learn.ELP_backend.service.EmailService;
 import com.Learn.ELP_backend.service.JWTService;
 import com.Learn.ELP_backend.service.UserService;
+import com.Learn.ELP_backend.exceptions.UserAlreadyExistsException;
 
 @Service
 public class UserServiceImpl implements UserService {
+
     @Autowired
     private UserRepository userRepository;
 
@@ -34,71 +34,74 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private EmailService emailService;
 
-    private BCryptPasswordEncoder passwordEncoder= new BCryptPasswordEncoder(12);
-    //this method is temporary for register users with adding roles commonly used for register admin accounts
+    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+
+    // Register admin or manual user creation for tempory use
     @Override
     public User RegisterUser(User user) {
+        if (userRepository.existsByUsername(user.getUsername()) ||
+            userRepository.existsByEmail(user.getEmail())) {
+            throw new UserAlreadyExistsException();
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
+
     @Override
     public String VerifyUser(User user) {
-        org.springframework.security.core.Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                user.getUsername(),
-                user.getPassword()
-            )
+        var authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
         );
+
         if (authentication.isAuthenticated()) {
             return jwtService.GenerateToken(user);
         } else {
             return "Authentication failed";
         }
     }
+
+    // Register Student
     @Override
-    public User registerStudent(StudentRegisterDTO studentDTO) {
-        if (userRepository.findByUsername(studentDTO.getUsername()) != null) {
-            throw new RuntimeException("Username already exists");
-        }
-        if (userRepository.findByEmail(studentDTO.getEmail()) != null) {
-            throw new RuntimeException("Email already exists");
+    public User registerStudent(StudentRegisterDTO dto) {
+        if (userRepository.existsByUsername(dto.getUsername()) ||
+            userRepository.existsByEmail(dto.getEmail())) {
+            throw new UserAlreadyExistsException();
         }
 
-        User user = new User();
-        user.setUsername(studentDTO.getUsername());
-        user.setPassword(passwordEncoder.encode(studentDTO.getPassword()));
-        user.setEmail(studentDTO.getEmail());
-        user.setRole("STUDENT");
-        user.setAuthProvider("local");
-        
-        return userRepository.save(user);
+        User student = new User();
+        student.setUsername(dto.getUsername());
+        student.setPassword(passwordEncoder.encode(dto.getPassword()));
+        student.setEmail(dto.getEmail());
+        student.setRole("STUDENT");
+        student.setAuthProvider("local");
+
+        return userRepository.save(student);
     }
+
+    // Register Teacher
     @Override
-    public User registerTeacher(TeacherRegisterDTO teacherDTO) {
-        // Check if user already exists
-        if (userRepository.findByUsername(teacherDTO.getUsername()) != null) {
-            throw new RuntimeException("Username already exists");
-        }
-        if (userRepository.findByEmail(teacherDTO.getEmail()) != null) {
-            throw new RuntimeException("Email already exists");
+    public User registerTeacher(TeacherRegisterDTO dto) {
+        if (userRepository.existsByUsername(dto.getUsername()) ||
+            userRepository.existsByEmail(dto.getEmail())) {
+            throw new UserAlreadyExistsException();
         }
 
-        // Convert DTO to entity
-        User user = new User();
-        user.setUsername(teacherDTO.getUsername());
-        user.setPassword(passwordEncoder.encode(teacherDTO.getPassword()));
-        user.setEmail(teacherDTO.getEmail());
-        user.setRole("TEACHER");
-        user.setAuthProvider("local");
-        
-        // Set teacher-specific fields
-        user.setQualification(teacherDTO.getQualification());
-        user.setYearsOfExperience(teacherDTO.getYearsOfExperience());
-        user.setSubjectExpertise(teacherDTO.getSubjectExpertise());
-        user.setBio(teacherDTO.getBio());
+        User teacher = new User();
+        teacher.setUsername(dto.getUsername());
+        teacher.setPassword(passwordEncoder.encode(dto.getPassword()));
+        teacher.setEmail(dto.getEmail());
+        teacher.setRole("TEACHER");
+        teacher.setAuthProvider("local");
 
-        return userRepository.save(user);
+        teacher.setQualification(dto.getQualification());
+        teacher.setYearsOfExperience(dto.getYearsOfExperience());
+        teacher.setSubjectExpertise(dto.getSubjectExpertise());
+        teacher.setBio(dto.getBio());
+
+        return userRepository.save(teacher);
     }
+
     @Override
     public void initiatePasswordReset(String email) {
         User user = userRepository.findByEmail(email);
@@ -107,19 +110,18 @@ public class UserServiceImpl implements UserService {
             user.setPasswordResetToken(resetToken);
             user.setPasswordResetTokenExpiry(LocalDateTime.now().plusHours(24));
             userRepository.save(user);
-            
-            // Send email with reset token
             emailService.sendPasswordResetEmail(email, resetToken);
         }
-        
     }
+
     @Override
     public boolean validatePasswordResetToken(String token) {
         User user = userRepository.findByPasswordResetToken(token);
-        return user != null && 
+        return user != null &&
                user.getPasswordResetTokenExpiry() != null &&
                user.getPasswordResetTokenExpiry().isAfter(LocalDateTime.now());
     }
+
     @Override
     public void resetPassword(String token, String newPassword) {
         User user = userRepository.findByPasswordResetToken(token);
@@ -133,6 +135,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Invalid or expired reset token");
         }
     }
+
     @Override
     public void changePassword(String username, String currentPassword, String newPassword) {
         User user = userRepository.findByUsername(username);
@@ -144,16 +147,16 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Current password is incorrect");
         }
     }
+
     @Override
     public String generatePasswordResetToken() {
         return UUID.randomUUID().toString();
     }
+
     @Override
     public String generateOTP() {
         Random random = new Random();
         int otp = 100000 + random.nextInt(900000);
         return String.valueOf(otp);
     }
-    
-
 }

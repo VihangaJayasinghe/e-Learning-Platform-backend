@@ -25,21 +25,19 @@ import com.Learn.ELP_backend.service.UserService;
 public class UserController {
     @Autowired
     private UserService userService;
-    @PostMapping("/register")//this temporary for register users with adding roles. commonly used for register admin accounts also we can use this for admin dashboard operations like add teachers admin and students
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        User registeredUser = userService.RegisterUser(user);
-        return ResponseEntity.ok(registeredUser);
+    @PostMapping("/register") //for tempory use
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        return ResponseEntity.ok(userService.RegisterUser(user));
     }
+
     @PostMapping("/register/student")
-    public ResponseEntity<User> registerStudent(@RequestBody StudentRegisterDTO studentDTO) {
-        User registeredStudent = userService.registerStudent(studentDTO);
-        return ResponseEntity.ok(registeredStudent);
+    public ResponseEntity<?> registerStudent(@RequestBody StudentRegisterDTO dto) {
+        return ResponseEntity.ok(userService.registerStudent(dto));
     }
 
     @PostMapping("/register/teacher")
-    public ResponseEntity<User> registerTeacher(@RequestBody TeacherRegisterDTO teacherDTO) {
-        User registeredTeacher = userService.registerTeacher(teacherDTO);
-        return ResponseEntity.ok(registeredTeacher);
+    public ResponseEntity<?> registerTeacher(@RequestBody TeacherRegisterDTO dto) {
+        return ResponseEntity.ok(userService.registerTeacher(dto));
     }
 
     @PostMapping("/login")
@@ -54,7 +52,7 @@ public class UserController {
             return ResponseEntity.ok("Password reset instructions sent to your email");
         } catch (Exception e) {
             return ResponseEntity.ok("Password reset instructions sent to your email");
-            // Always return same message for security
+            
         }
     }
     
