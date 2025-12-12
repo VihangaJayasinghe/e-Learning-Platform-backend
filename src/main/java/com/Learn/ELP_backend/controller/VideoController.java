@@ -4,6 +4,7 @@ import com.Learn.ELP_backend.model.Video;
 import com.Learn.ELP_backend.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public class VideoController {
     private VideoService videoService;
 
     // Upload video
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PostMapping("/upload")
     public ResponseEntity<Video> uploadVideo(
             @RequestParam("file") MultipartFile file,
@@ -28,6 +30,7 @@ public class VideoController {
     }
 
     // Create test video (without file upload)
+    
     @PostMapping("/test")
     public ResponseEntity<Video> createTestVideo() {
         Video testVideo = Video.builder()
