@@ -15,5 +15,5 @@ public class Question {
     private String questionId;
     private String questionText;
     private List<String> options;
-    private int correctAnswerIndex;
+    private Integer correctAnswerIndex;
 }
