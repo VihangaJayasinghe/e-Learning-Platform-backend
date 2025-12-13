@@ -1,6 +1,7 @@
 package com.Learn.ELP_backend.controller;
 
 import com.Learn.ELP_backend.model.Class;
+import com.Learn.ELP_backend.model.Question;
 import com.Learn.ELP_backend.model.ClassStatus;
 import com.Learn.ELP_backend.service.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class ClassController {
     // Class status management
     @PatchMapping("/{id}/status")
     public ResponseEntity<Class> updateClassStatus(
-            @PathVariable String id, 
+            @PathVariable String id,
             @RequestParam ClassStatus status) {
         Class updatedClass = classService.updateClassStatus(id, status);
         return ResponseEntity.ok(updatedClass);
@@ -115,4 +116,39 @@ public class ClassController {
         List<String> videoIds = classService.getMonthVideos(classId, yearMonth);
         return ResponseEntity.ok(videoIds);
     }
+
+    // ADD question
+    @PostMapping("/{classId}/months/{yearMonth}/quizzes/{quizId}/questions")
+    public ResponseEntity<Question> addQuestion(
+            @PathVariable String classId,
+            @PathVariable String yearMonth,
+            @PathVariable String quizId,
+            @RequestBody Question question) {
+        Question saved = classService.addQuestionToQuiz(classId, yearMonth, quizId, question);
+        return ResponseEntity.ok(saved);
+    }
+
+    // UPDATE question
+    @PutMapping("/{classId}/months/{yearMonth}/quizzes/{quizId}/questions/{questionId}")
+    public ResponseEntity<Question> updateQuestion(
+            @PathVariable String classId,
+            @PathVariable String yearMonth,
+            @PathVariable String quizId,
+            @PathVariable String questionId,
+            @RequestBody Question questionUpdate) {
+        Question updated = classService.updateQuestionInQuiz(classId, yearMonth, quizId, questionId, questionUpdate);
+        return ResponseEntity.ok(updated);
+    }
+
+    // DELETE question
+    @DeleteMapping("/{classId}/months/{yearMonth}/quizzes/{quizId}/questions/{questionId}")
+    public ResponseEntity<Void> deleteQuestion(
+            @PathVariable String classId,
+            @PathVariable String yearMonth,
+            @PathVariable String quizId,
+            @PathVariable String questionId) {
+        classService.deleteQuestionFromQuiz(classId, yearMonth, quizId, questionId);
+        return ResponseEntity.ok().build();
+    }
+
 }
