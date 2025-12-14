@@ -14,19 +14,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @lombok.Builder
-@Document(collection = "quizes")
+@Document(collection = "quizzes")
 public class Quiz {
     @Id
-    private String Id;
-    
-    private String classId;
-    private String yearMonth;
+    private String id;
+
     private String quizTitle;
     private String description;
     private List<Question> questions;
-    // timeLimit
     private String createdBy;
-    
+    private String classId;
+    private String monthId;
+
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    private String className;
+    private String monthDisplayName;
+
 }
