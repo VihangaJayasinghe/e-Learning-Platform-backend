@@ -59,7 +59,7 @@ public class UserController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
         try {
-            userService.resetPassword(resetPasswordDTO.getToken(), resetPasswordDTO.getNewPassword());
+            userService.resetPassword(resetPasswordDTO.getToken(), resetPasswordDTO.getNewPassword(), resetPasswordDTO.getConfirmPassword());
             return ResponseEntity.ok("Password reset successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid or expired reset token");

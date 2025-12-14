@@ -11,7 +11,7 @@ public interface UserService {
     String VerifyUser(User user);
     void initiatePasswordReset(String email);
     boolean validatePasswordResetToken(String token);
-    void resetPassword(String token, String newPassword);
+    void resetPassword(String token, String newPassword,String confirmPassword);
     void changePassword(String username, String currentPassword, String newPassword);
     String generatePasswordResetToken();
     String generateOTP();

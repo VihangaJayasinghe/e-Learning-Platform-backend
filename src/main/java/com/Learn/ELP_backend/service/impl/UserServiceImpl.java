@@ -123,10 +123,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resetPassword(String token, String newPassword) {
+    public void resetPassword(String token, String newPassword,String confirmPassword) {
         User user = userRepository.findByPasswordResetToken(token);
         if (user != null && validatePasswordResetToken(token)) {
-            user.setPassword(passwordEncoder.encode(newPassword));
+            if (!newPassword.equals(confirmPassword)) {
+                throw new RuntimeException("New password and confirm password do not match");
+                
+            }
+            else {
+                user.setPassword(passwordEncoder.encode(newPassword));
+            }
             user.setPasswordResetToken(null);
             user.setPasswordResetTokenExpiry(null);
             user.setLastPasswordChange(LocalDateTime.now());
