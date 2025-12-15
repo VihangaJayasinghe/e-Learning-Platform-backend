@@ -5,6 +5,7 @@ import com.Learn.ELP_backend.model.ClassStatus;
 import com.Learn.ELP_backend.service.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,36 +18,38 @@ public class ClassController {
     private ClassService classService;
 
     // Class CRUD operations
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Class> createClass(@RequestBody Class classObj) {
         Class createdClass = classService.createClass(classObj);
         return ResponseEntity.ok(createdClass);
     }
-
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN') or hasRole('STUDENT')")
     @GetMapping
     public ResponseEntity<List<Class>> getAllClasses() {
         List<Class> classes = classService.getAllClasses();
         return ResponseEntity.ok(classes);
     }
 
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN') or hasRole('STUDENT')")
     @GetMapping("/{id}")
     public ResponseEntity<Class> getClassById(@PathVariable String id) {
         Class classObj = classService.getClassById(id);
         return ResponseEntity.ok(classObj);
     }
-
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN') or hasRole('STUDENT')")
     @GetMapping("/instructor/{instructorId}")
     public ResponseEntity<List<Class>> getClassesByInstructor(@PathVariable String instructorId) {
         List<Class> classes = classService.getClassesByInstructor(instructorId);
         return ResponseEntity.ok(classes);
     }
-
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Class> updateClass(@PathVariable String id, @RequestBody Class classUpdate) {
         Class updatedClass = classService.updateClass(id, classUpdate);
         return ResponseEntity.ok(updatedClass);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClass(@PathVariable String id) {
         classService.deleteClass(id);
@@ -54,6 +57,7 @@ public class ClassController {
     }
 
     // Class status management
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<Class> updateClassStatus(
             @PathVariable String id, 
@@ -63,6 +67,7 @@ public class ClassController {
     }
 
     // Month video management
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PostMapping("/{classId}/months/{yearMonth}/videos/{videoId}")
     public ResponseEntity<Class> addVideoToMonth(
             @PathVariable String classId,
@@ -71,7 +76,7 @@ public class ClassController {
         Class updatedClass = classService.addVideoToMonth(classId, yearMonth, videoId);
         return ResponseEntity.ok(updatedClass);
     }
-
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @DeleteMapping("/{classId}/months/{yearMonth}/videos/{videoId}")
     public ResponseEntity<Class> removeVideoFromMonth(
             @PathVariable String classId,
@@ -82,6 +87,7 @@ public class ClassController {
     }
 
     // Month release management
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PostMapping("/{classId}/months/{yearMonth}/release")
     public ResponseEntity<Class> releaseMonth(
             @PathVariable String classId,
@@ -90,6 +96,7 @@ public class ClassController {
         return ResponseEntity.ok(updatedClass);
     }
 
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PostMapping("/{classId}/months/{yearMonth}/unrelease")
     public ResponseEntity<Class> unreleaseMonth(
             @PathVariable String classId,
@@ -99,6 +106,7 @@ public class ClassController {
     }
 
     // Class duration management
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/extend")
     public ResponseEntity<Class> extendClassDuration(
             @PathVariable String id,
@@ -108,6 +116,7 @@ public class ClassController {
     }
 
     // Get month's videos
+     @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN') or hasRole('STUDENT')")
     @GetMapping("/{classId}/months/{yearMonth}/videos")
     public ResponseEntity<List<String>> getMonthVideos(
             @PathVariable String classId,

@@ -25,6 +25,16 @@ public class CloudinaryStorageService {
         
         return (String) uploadResult.get("secure_url");
     }
+
+    public String uploadRaw(MultipartFile file) throws IOException {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(),
+            ObjectUtils.asMap(
+                "resource_type", "raw",
+                "folder", "elearning-documents"
+            ));
+        return (String) uploadResult.get("secure_url");
+    }
     
     public void deleteVideo(String fileUrl) {
         try {
@@ -40,6 +50,29 @@ public class CloudinaryStorageService {
                 throw new RuntimeException("Cloudinary deletion failed: " + result.get("result"));
             }
             
+        } catch (Exception e) {
+            throw new RuntimeException("Cloudinary deletion failed: " + e.getMessage());
+        }
+    }
+
+        public void deleteRaw(String fileUrl) {
+        deleteFromCloudinary(fileUrl, "raw");
+    }
+
+     private void deleteFromCloudinary(String fileUrl, String resourceType) {
+        try {
+            String publicId = extractPublicIdFromUrl(fileUrl);
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = cloudinary.uploader().destroy(publicId,
+                    ObjectUtils.asMap(
+                            "resource_type", resourceType
+                    ));
+
+            if (!"ok".equals(result.get("result"))) {
+                throw new RuntimeException("Cloudinary deletion failed: " + result.get("result"));
+            }
+
         } catch (Exception e) {
             throw new RuntimeException("Cloudinary deletion failed: " + e.getMessage());
         }
