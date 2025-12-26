@@ -27,11 +27,6 @@ public class QuizServiceImpl implements QuizService {
         Class classObj = classRepository.findById(quiz.getClassId())
                 .orElseThrow(() -> new RuntimeException("Class not found: " + quiz.getClassId()));
 
-        // Set additional info
-        String quizId = UUID.randomUUID().toString();
-        quiz.setId(quizId);
-        quiz.setClassName(classObj.getClassName());
-
         // Validate month exists
         ClassMonth month = classObj.getMonths().stream()
                 .filter(m -> m.getYearMonth().equals(quiz.getMonthId()))
@@ -39,6 +34,8 @@ public class QuizServiceImpl implements QuizService {
                 .orElseThrow(() -> new RuntimeException("Month not found in class"));
 
         // Set additional info
+        String quizId = UUID.randomUUID().toString();
+        quiz.setId(quizId);
         quiz.setClassName(classObj.getClassName());
         quiz.setMonthDisplayName(month.getDisplayName());
 
@@ -132,6 +129,7 @@ public class QuizServiceImpl implements QuizService {
         if (questionUpdate.getOptions() != null) {
             existing.setOptions(questionUpdate.getOptions());
         }
+       
         if (questionUpdate.getCorrectAnswerIndex() != null) {
             existing.setCorrectAnswerIndex(questionUpdate.getCorrectAnswerIndex());
         }

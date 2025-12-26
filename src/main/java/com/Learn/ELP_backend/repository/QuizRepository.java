@@ -13,6 +13,6 @@ public interface QuizRepository extends MongoRepository<Quiz, String> {
 List<Quiz> findByClassId(String classId);
 
 @Query("{ 'classId': ?0, 'yearMonth': ?1 }")
-List<Quiz> findByClassIdAndYearMonth(String classId, String yearMonth);
+List<Quiz> findByClassIdAndMonthId(String classId, String yearMonth);
 }
 

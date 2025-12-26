@@ -1,7 +1,6 @@
 package com.Learn.ELP_backend.model;
 
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +14,5 @@ public class Question {
     private String questionId;
     private String questionText;
     private List<String> options;
-    private int correctAnswerIndex;
+    private Integer correctAnswerIndex;  
 }
