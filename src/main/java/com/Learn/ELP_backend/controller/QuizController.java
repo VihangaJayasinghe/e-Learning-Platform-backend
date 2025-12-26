@@ -1,5 +1,6 @@
 package com.Learn.ELP_backend.controller;
 
+import com.Learn.ELP_backend.model.Question;
 import com.Learn.ELP_backend.model.Quiz;
 import com.Learn.ELP_backend.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +42,29 @@ public class QuizController {
         return ResponseEntity.ok(quizService.getQuizzesByClass(classId));
     }
 
-    @GetMapping("/class/{classId}/month/{yearMonth}")
+    @GetMapping("/class/{classId}/month/{monthId}")
     public ResponseEntity<List<Quiz>> getQuizzesByClassAndMonth(@PathVariable String classId,
-                                                                @PathVariable String yearMonth) {
-        return ResponseEntity.ok(quizService.getQuizzesByClassAndMonth(classId, yearMonth));
+                                                                @PathVariable String monthId) {
+        return ResponseEntity.ok(quizService.getQuizzesByClassAndMonth(classId, monthId));
+    }
+
+    //Question Management
+    @PostMapping("/{quizId}/add-question")
+    public ResponseEntity<Quiz> addQuestionToQuiz(@PathVariable String quizId, 
+                                                  @RequestBody Question question) {
+        return ResponseEntity.ok(quizService.addQuestionToQuiz(quizId, question));
+    }
+
+    @PutMapping("/{quizId}/update-question/{questionId}")
+    public ResponseEntity<Quiz> updateQuestionInQuiz(@PathVariable String quizId,
+                                                     @PathVariable String questionId,
+                                                     @RequestBody Question questionUpdate) {
+        return ResponseEntity.ok(quizService.updateQuestionInQuiz(quizId, questionId, questionUpdate));
+    }
+
+    @DeleteMapping("/{quizId}/delete-question/{questionId}")
+    public ResponseEntity<Quiz> deleteQuestionFromQuiz(@PathVariable String quizId,
+                                                       @PathVariable String questionId) {
+        return ResponseEntity.ok(quizService.deleteQuestionFromQuiz(quizId, questionId));
     }
 }

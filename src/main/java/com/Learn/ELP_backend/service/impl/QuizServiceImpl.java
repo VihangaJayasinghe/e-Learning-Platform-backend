@@ -10,6 +10,7 @@ import com.Learn.ELP_backend.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,6 +39,15 @@ public class QuizServiceImpl implements QuizService {
         quiz.setId(quizId);
         quiz.setClassName(classObj.getClassName());
         quiz.setMonthDisplayName(month.getDisplayName());
+
+        // Set question id if its not set
+        if (quiz.getQuestions() != null) {
+            for (Question question : quiz.getQuestions()) {
+                if (question.getQuestionId() == null || question.getQuestionId().isEmpty()) {
+                    question.setQuestionId(UUID.randomUUID().toString());
+            }
+        }
+    }
 
         // Save quiz first
         Quiz savedQuiz = quizRepository.save(quiz);
@@ -68,21 +78,27 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public Quiz updateQuiz(String id, Quiz quizUpdate) {
-        Quiz existingQuiz = getQuizById(id);
+public Quiz updateQuiz(String id, Quiz quizUpdate) {
+    Quiz existingQuiz = getQuizById(id);
 
-        if (quizUpdate.getQuizTitle() != null) {
-            existingQuiz.setQuizTitle(quizUpdate.getQuizTitle());
-        }
-        if (quizUpdate.getDescription() != null) {
-            existingQuiz.setDescription(quizUpdate.getDescription());
-        }
-        if (quizUpdate.getQuestions() != null) {
-            existingQuiz.setQuestions(quizUpdate.getQuestions());
-        }
-
-        return quizRepository.save(existingQuiz);
+    if (quizUpdate.getQuizTitle() != null) {
+        existingQuiz.setQuizTitle(quizUpdate.getQuizTitle());
     }
+    if (quizUpdate.getDescription() != null) {
+        existingQuiz.setDescription(quizUpdate.getDescription());
+    }
+    if (quizUpdate.getQuestions() != null) {
+        // Generate IDs for any new questions without IDs
+        for (Question question : quizUpdate.getQuestions()) {
+            if (question.getQuestionId() == null || question.getQuestionId().isEmpty()) {
+                question.setQuestionId(UUID.randomUUID().toString());
+            }
+        }
+        existingQuiz.setQuestions(quizUpdate.getQuestions());
+    }
+
+    return quizRepository.save(existingQuiz);
+}
 
     @Override
     public void deleteQuiz(String id) {
@@ -107,6 +123,10 @@ public class QuizServiceImpl implements QuizService {
     @Override
     public Quiz addQuestionToQuiz(String quizId, Question question) {
         Quiz quiz = getQuizById(quizId);
+
+        if (quiz.getQuestions() == null) {
+        quiz.setQuestions(new ArrayList<>());
+    }
 
         question.setQuestionId(UUID.randomUUID().toString());
         quiz.getQuestions().add(question);
