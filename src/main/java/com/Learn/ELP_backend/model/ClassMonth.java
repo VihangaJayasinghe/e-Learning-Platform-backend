@@ -24,6 +24,9 @@ public class ClassMonth {
     @Builder.Default
     private List<String> quizIds = new ArrayList<>();
 
+     @Builder.Default
+    private List<String> documentIds = new ArrayList<>();
+
     @Builder.Default
     private boolean isReleased = false;
 
