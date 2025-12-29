@@ -37,6 +37,19 @@ public class QuizController {
         return ResponseEntity.ok(quizService.getQuizById(quizId));
     }
 
+    // Get quiz for student (without correct answers)
+    @GetMapping("/{quizId}/attempt")
+    public ResponseEntity<Quiz> getQuizForAttempt(@PathVariable String quizId) {
+        Quiz quiz = quizService.getQuizById(quizId);
+        if (quiz.getQuestions() != null) {
+            quiz.getQuestions().forEach(question -> {
+                question.setCorrectAnswerIndex(-1); // Hide correct answer
+            });
+        }
+    
+        return ResponseEntity.ok(quiz);
+    }
+
     @GetMapping("/class/{classId}")
     public ResponseEntity<List<Quiz>> getQuizzesByClass(@PathVariable String classId) {
         return ResponseEntity.ok(quizService.getQuizzesByClass(classId));
@@ -67,4 +80,6 @@ public class QuizController {
                                                        @PathVariable String questionId) {
         return ResponseEntity.ok(quizService.deleteQuestionFromQuiz(quizId, questionId));
     }
+
+
 }

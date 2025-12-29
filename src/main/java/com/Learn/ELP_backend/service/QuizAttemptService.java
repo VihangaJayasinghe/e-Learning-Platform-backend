@@ -1,6 +1,5 @@
 package com.Learn.ELP_backend.service;
 
-import com.Learn.ELP_backend.model.Quiz;
 import com.Learn.ELP_backend.model.QuizAttempt;
 import com.Learn.ELP_backend.model.QuizResult;
 import java.util.List;
