@@ -21,7 +21,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     private QuizRepository quizRepository;
     
     @Autowired
-    private QuizResultRepository quizResultRepository; // Optional
+    private QuizResultRepository quizResultRepository;
     
     @Override
     public QuizAttempt startQuizAttempt(String quizId, String studentId, String studentName) {
