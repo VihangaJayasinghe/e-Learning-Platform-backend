@@ -3,7 +3,6 @@ package com.Learn.ELP_backend.service.impl;
 import com.Learn.ELP_backend.model.Course;
 import com.Learn.ELP_backend.repository.CourseRepository;
 import com.Learn.ELP_backend.service.CourseService;
-import com.Learn.ELP_backend.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -14,9 +13,6 @@ import java.util.UUID;
 public class CourseServiceImpl implements CourseService{
     @Autowired
     private CourseRepository courseRepository;
-    
-    @Autowired
-    private ReviewService reviewService;
 
     @Override
     public Course createCourse(Course course) {
@@ -225,13 +221,6 @@ public class CourseServiceImpl implements CourseService{
         Course course = getCourseById(courseId);
         course.getQuizIds().remove(quizId);
         return courseRepository.save(course);
-    }
-
-    @Override
-    public void updateCourseRating(String courseId) {
-        // This will be called from ReviewService when reviews are added/updated/deleted
-        // For now, we'll just update it when needed
-        // In the ReviewService, we'll call this method
     }
 
 }

@@ -23,7 +23,5 @@ public interface CourseService {
     Course removeDocumentFromCourse(String courseId, String documentId);
     Course addQuizToCourse(String courseId, String quizId);
     Course removeQuizFromCourse(String courseId, String quizId);
-    
-    // Update rating from reviews
-    void updateCourseRating(String courseId);
+
 }
