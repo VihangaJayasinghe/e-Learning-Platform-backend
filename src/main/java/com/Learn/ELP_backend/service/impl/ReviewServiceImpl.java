@@ -4,7 +4,6 @@ import com.Learn.ELP_backend.model.Course;
 import com.Learn.ELP_backend.model.Review;
 import com.Learn.ELP_backend.repository.CourseRepository;
 import com.Learn.ELP_backend.repository.ReviewRepository;
-import com.Learn.ELP_backend.service.CourseService;
 import com.Learn.ELP_backend.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,9 +19,6 @@ public class ReviewServiceImpl implements ReviewService {
     
     @Autowired
     private CourseRepository courseRepository;
-    
-    @Autowired
-    private CourseService courseService;
     
     @Override
     public Review createReview(Review review) {
