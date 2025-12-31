@@ -36,14 +36,28 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewById(id));
     }
     
+    // Get reviews for a course
     @GetMapping("/course/{courseId}")
-    public ResponseEntity<List<Review>> getReviewsForCourse(@PathVariable String courseId) {
-        return ResponseEntity.ok(reviewService.getReviewsForCourse(courseId));
+    public ResponseEntity<List<Review>> getCourseReviews(@PathVariable String courseId) {
+        return ResponseEntity.ok(reviewService.getReviewsForTarget(courseId, Review.ReviewTargetType.COURSE));
     }
     
+    // Get reviews for a class
+    @GetMapping("/class/{classId}")
+    public ResponseEntity<List<Review>> getClassReviews(@PathVariable String classId) {
+        return ResponseEntity.ok(reviewService.getReviewsForTarget(classId, Review.ReviewTargetType.CLASS));
+    }
+    
+    // Get approved reviews for a course
     @GetMapping("/course/{courseId}/approved")
-    public ResponseEntity<List<Review>> getApprovedReviewsForCourse(@PathVariable String courseId) {
-        return ResponseEntity.ok(reviewService.getApprovedReviewsForCourse(courseId));
+    public ResponseEntity<List<Review>> getApprovedCourseReviews(@PathVariable String courseId) {
+        return ResponseEntity.ok(reviewService.getApprovedReviewsForTarget(courseId, Review.ReviewTargetType.COURSE));
+    }
+    
+    // Get approved reviews for a class
+    @GetMapping("/class/{classId}/approved")
+    public ResponseEntity<List<Review>> getApprovedClassReviews(@PathVariable String classId) {
+        return ResponseEntity.ok(reviewService.getApprovedReviewsForTarget(classId, Review.ReviewTargetType.CLASS));
     }
     
     @GetMapping("/student/{studentId}")
@@ -56,11 +70,20 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getInstructorReviews(instructorId));
     }
     
+    // Check if student has reviewed a course
     @GetMapping("/course/{courseId}/student/{studentId}/has-reviewed")
-    public ResponseEntity<Boolean> hasStudentReviewed(
+    public ResponseEntity<Boolean> hasStudentReviewedCourse(
             @PathVariable String courseId,
             @PathVariable String studentId) {
         return ResponseEntity.ok(reviewService.hasStudentReviewed(courseId, studentId));
+    }
+    
+    // Check if student has reviewed a class
+    @GetMapping("/class/{classId}/student/{studentId}/has-reviewed")
+    public ResponseEntity<Boolean> hasStudentReviewedClass(
+            @PathVariable String classId,
+            @PathVariable String studentId) {
+        return ResponseEntity.ok(reviewService.hasStudentReviewed(classId, studentId));
     }
     
     @PostMapping("/{reviewId}/helpful")
@@ -85,8 +108,15 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
     
+    // Get review statistics for a course
     @GetMapping("/course/{courseId}/stats")
     public ResponseEntity<Map<String, Object>> getCourseReviewStats(@PathVariable String courseId) {
-        return ResponseEntity.ok(reviewService.getCourseReviewStats(courseId));
+        return ResponseEntity.ok(reviewService.getReviewStats(courseId, Review.ReviewTargetType.COURSE));
+    }
+    
+    // Get review statistics for a class
+    @GetMapping("/class/{classId}/stats")
+    public ResponseEntity<Map<String, Object>> getClassReviewStats(@PathVariable String classId) {
+        return ResponseEntity.ok(reviewService.getReviewStats(classId, Review.ReviewTargetType.CLASS));
     }
 }

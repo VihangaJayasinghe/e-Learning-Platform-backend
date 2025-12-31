@@ -7,11 +7,24 @@ import java.util.List;
 
 @Repository
 public interface ReviewRepository extends MongoRepository<Review, String> {
-    List<Review> findByCourseId(String courseId);
-    List<Review> findByCourseIdAndIsApproved(String courseId, boolean isApproved);
+    // For both courses and classes
+    List<Review> findByTargetId(String targetId);
+    List<Review> findByTargetIdAndTargetType(String targetId, Review.ReviewTargetType targetType);
+    List<Review> findByTargetIdAndTargetTypeAndIsApproved(String targetId, 
+                                                         Review.ReviewTargetType targetType, 
+                                                         boolean isApproved);
+    
+    // Student reviews
     List<Review> findByStudentId(String studentId);
+    
+    // Instructor reviews (both courses and classes they teach)
     List<Review> findByInstructorId(String instructorId);
-    List<Review> findByRating(Integer rating);
-    boolean existsByCourseIdAndStudentId(String courseId, String studentId);
-    Integer countByCourseIdAndIsApproved(String courseId, boolean isApproved);
+    
+    // Check if student has already reviewed
+    boolean existsByTargetIdAndStudentId(String targetId, String studentId);
+    
+    // Count reviews
+    Integer countByTargetIdAndTargetTypeAndIsApproved(String targetId, 
+                                                     Review.ReviewTargetType targetType, 
+                                                     boolean isApproved);
 }

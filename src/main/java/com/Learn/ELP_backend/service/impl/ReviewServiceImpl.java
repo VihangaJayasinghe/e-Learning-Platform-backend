@@ -1,9 +1,8 @@
 package com.Learn.ELP_backend.service.impl;
 
-import com.Learn.ELP_backend.model.Course;
-import com.Learn.ELP_backend.model.Review;
-import com.Learn.ELP_backend.repository.CourseRepository;
-import com.Learn.ELP_backend.repository.ReviewRepository;
+import com.Learn.ELP_backend.model.*;
+import com.Learn.ELP_backend.model.Class;
+import com.Learn.ELP_backend.repository.*;
 import com.Learn.ELP_backend.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,11 +19,15 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private CourseRepository courseRepository;
     
+    @Autowired
+    private ClassRepository classRepository;
+    
     @Override
     public Review createReview(Review review) {
-        // Check if student has already reviewed this course
-        if (hasStudentReviewed(review.getCourseId(), review.getStudentId())) {
-            throw new RuntimeException("You have already reviewed this course");
+        // Check if student has already reviewed this target
+        if (hasStudentReviewed(review.getTargetId(), review.getStudentId())) {
+            throw new RuntimeException("You have already reviewed this " + 
+                                      review.getTargetType().toString().toLowerCase());
         }
         
         // Validate rating
@@ -37,17 +40,24 @@ public class ReviewServiceImpl implements ReviewService {
         review.setCreatedAt(LocalDateTime.now());
         review.setUpdatedAt(LocalDateTime.now());
         
-        // Set instructor ID from course
-        Course course = courseRepository.findById(review.getCourseId()).orElse(null);
-        if (course != null) {
-            review.setInstructorId(course.getInstructorId());
+        // Set instructor ID based on target type
+        if (review.getTargetType() == Review.ReviewTargetType.COURSE) {
+            Course course = courseRepository.findById(review.getTargetId()).orElse(null);
+            if (course != null) {
+                review.setInstructorId(course.getInstructorId());
+            }
+        } else if (review.getTargetType() == Review.ReviewTargetType.CLASS) {
+            Class classObj = classRepository.findById(review.getTargetId()).orElse(null);
+            if (classObj != null) {
+                review.setInstructorId(classObj.getInstructorId());
+            }
         }
         
         // Save review
         Review savedReview = reviewRepository.save(review);
         
-        // Update course rating
-        updateCourseRatingFromReviews(review.getCourseId());
+        // Update target rating
+        updateTargetRating(review.getTargetId(), review.getTargetType());
         
         return savedReview;
     }
@@ -75,8 +85,8 @@ public class ReviewServiceImpl implements ReviewService {
         
         Review updatedReview = reviewRepository.save(review);
         
-        // Update course rating
-        updateCourseRatingFromReviews(review.getCourseId());
+        // Update target rating
+        updateTargetRating(review.getTargetId(), review.getTargetType());
         
         return updatedReview;
     }
@@ -84,12 +94,13 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public void deleteReview(String id) {
         Review review = getReviewById(id);
-        String courseId = review.getCourseId();
+        String targetId = review.getTargetId();
+        Review.ReviewTargetType targetType = review.getTargetType();
         
         reviewRepository.deleteById(id);
         
-        // Update course rating
-        updateCourseRatingFromReviews(courseId);
+        // Update target rating
+        updateTargetRating(targetId, targetType);
     }
     
     @Override
@@ -99,13 +110,13 @@ public class ReviewServiceImpl implements ReviewService {
     }
     
     @Override
-    public List<Review> getReviewsForCourse(String courseId) {
-        return reviewRepository.findByCourseId(courseId);
+    public List<Review> getReviewsForTarget(String targetId, Review.ReviewTargetType targetType) {
+        return reviewRepository.findByTargetIdAndTargetType(targetId, targetType);
     }
     
     @Override
-    public List<Review> getApprovedReviewsForCourse(String courseId) {
-        return reviewRepository.findByCourseIdAndIsApproved(courseId, true);
+    public List<Review> getApprovedReviewsForTarget(String targetId, Review.ReviewTargetType targetType) {
+        return reviewRepository.findByTargetIdAndTargetTypeAndIsApproved(targetId, targetType, true);
     }
     
     @Override
@@ -119,8 +130,8 @@ public class ReviewServiceImpl implements ReviewService {
     }
     
     @Override
-    public boolean hasStudentReviewed(String courseId, String studentId) {
-        return reviewRepository.existsByCourseIdAndStudentId(courseId, studentId);
+    public boolean hasStudentReviewed(String targetId, String studentId) {
+        return reviewRepository.existsByTargetIdAndStudentId(targetId, studentId);
     }
     
     @Override
@@ -134,7 +145,6 @@ public class ReviewServiceImpl implements ReviewService {
     public Review reportReview(String reviewId) {
         Review review = getReviewById(reviewId);
         // For now, just mark as not approved if reported
-        // In real app, you'd track reports separately
         review.setIsApproved(false);
         return reviewRepository.save(review);
     }
@@ -145,8 +155,8 @@ public class ReviewServiceImpl implements ReviewService {
         review.setIsApproved(true);
         reviewRepository.save(review);
         
-        // Update course rating
-        updateCourseRatingFromReviews(review.getCourseId());
+        // Update target rating
+        updateTargetRating(review.getTargetId(), review.getTargetType());
     }
     
     @Override
@@ -155,16 +165,17 @@ public class ReviewServiceImpl implements ReviewService {
         review.setIsApproved(false);
         reviewRepository.save(review);
         
-        // Update course rating
-        updateCourseRatingFromReviews(review.getCourseId());
+        // Update target rating
+        updateTargetRating(review.getTargetId(), review.getTargetType());
     }
     
     @Override
-    public Map<String, Object> getCourseReviewStats(String courseId) {
-        List<Review> approvedReviews = getApprovedReviewsForCourse(courseId);
+    public Map<String, Object> getReviewStats(String targetId, Review.ReviewTargetType targetType) {
+        List<Review> approvedReviews = getApprovedReviewsForTarget(targetId, targetType);
         
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalReviews", approvedReviews.size());
+        stats.put("targetType", targetType.toString());
         
         if (approvedReviews.isEmpty()) {
             stats.put("averageRating", 0.0);
@@ -193,9 +204,17 @@ public class ReviewServiceImpl implements ReviewService {
     }
     
     @Override
-    public void updateCourseRatingFromReviews(String courseId) {
-        List<Review> approvedReviews = getApprovedReviewsForCourse(courseId);
+    public void updateTargetRating(String targetId, Review.ReviewTargetType targetType) {
+        List<Review> approvedReviews = getApprovedReviewsForTarget(targetId, targetType);
         
+        if (targetType == Review.ReviewTargetType.COURSE) {
+            updateCourseRating(targetId, approvedReviews);
+        } else if (targetType == Review.ReviewTargetType.CLASS) {
+            updateClassRating(targetId, approvedReviews);
+        }
+    }
+    
+    private void updateCourseRating(String courseId, List<Review> approvedReviews) {
         Course course = courseRepository.findById(courseId).orElse(null);
         if (course == null) {
             return;
@@ -215,5 +234,27 @@ public class ReviewServiceImpl implements ReviewService {
         }
         
         courseRepository.save(course);
+    }
+    
+    private void updateClassRating(String classId, List<Review> approvedReviews) {
+        Class classObj = classRepository.findById(classId).orElse(null);
+        if (classObj == null) {
+            return;
+        }
+        
+        if (approvedReviews.isEmpty()) {
+            classObj.setAverageRating(0.0);
+            classObj.setTotalReviews(0);
+        } else {
+            double average = approvedReviews.stream()
+                    .mapToInt(Review::getRating)
+                    .average()
+                    .orElse(0.0);
+            
+            classObj.setAverageRating(Math.round(average * 10.0) / 10.0);
+            classObj.setTotalReviews(approvedReviews.size());
+        }
+        
+        classRepository.save(classObj);
     }
 }

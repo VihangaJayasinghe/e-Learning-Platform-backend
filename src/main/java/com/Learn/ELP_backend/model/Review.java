@@ -17,12 +17,16 @@ public class Review {
      @Id
     private String id;
 
-    private String courseId;
+    private String targetId; // Course ID or Class ID
+    private ReviewTargetType targetType; // COURSE or CLASS
+
     private String studentId;
     private String studentName;
+
     private Integer rating;
     private String title;
     private String comment;
+
     private String instructorId; // For filtering by instructor
     
     // Status (for moderation)
@@ -36,4 +40,8 @@ public class Review {
     private LocalDateTime createdAt = LocalDateTime.now();
     
     private LocalDateTime updatedAt;
+
+    public enum ReviewTargetType {
+        COURSE, CLASS
+    }
 }
