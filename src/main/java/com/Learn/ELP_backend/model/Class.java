@@ -39,6 +39,13 @@ public class Class {
     
     @Builder.Default
     private ClassStatus status = ClassStatus.DRAFT;
+
+    // Review and rating fields
+    @Builder.Default
+    private Double averageRating = 0.0;
+    
+    @Builder.Default
+    private Integer totalReviews = 0;
     
     // Auto-create months based on duration
     public void initializeMonths() {
@@ -87,4 +94,10 @@ public class Class {
                 .findFirst()
                 .orElse(null);
     }
+
+    public String getInstructorName() {
+        // For now return "Instructor" until UserService is implemented
+        return "Instructor";
+    }
+
 }
