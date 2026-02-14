@@ -14,5 +14,5 @@ public class TeacherRegisterDTO {
     private Integer yearsOfExperience;
     private String subjectExpertise;
     private String bio;
-    
+    private String mobile_number;
 }

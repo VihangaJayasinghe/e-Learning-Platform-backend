@@ -65,8 +65,13 @@ public Documents uploadDocument(MultipartFile file, String name, String descript
     public void deleteDocument(String id) {
         Documents doc = documentRepository.findById(id).orElse(null);
         if (doc != null) {
+            try {
             cloudinaryStorageService.deleteRaw(doc.getCloudinaryUrl());
             documentRepository.deleteById(id);
+            }
+            catch (Exception e) {
+                throw new RuntimeException("Failed to delete document from storage: " + e.getMessage());
+            }
         }
     }
 }

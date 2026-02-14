@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
 
+import org.checkerframework.checker.units.qual.t;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -75,6 +76,8 @@ public class UserServiceImpl implements UserService {
         student.setEmail(dto.getEmail());
         student.setRole("STUDENT");
         student.setAuthProvider("local");
+        student.setFirst_name(dto.getFirst_name());
+        student.setLast_name(dto.getLast_name());
 
         return userRepository.save(student);
     }
@@ -98,6 +101,10 @@ public class UserServiceImpl implements UserService {
         teacher.setYearsOfExperience(dto.getYearsOfExperience());
         teacher.setSubjectExpertise(dto.getSubjectExpertise());
         teacher.setBio(dto.getBio());
+        teacher.setMobile_number(dto.getMobile_number());
+        teacher.setFirst_name(dto.getFirst_name());
+        teacher.setLast_name(dto.getLast_name());
+        teacher.setNic(dto.getNic());
 
         return userRepository.save(teacher);
     }

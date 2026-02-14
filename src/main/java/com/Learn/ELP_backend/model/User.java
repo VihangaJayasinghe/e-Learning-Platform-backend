@@ -29,6 +29,7 @@ public class User {
     private String last_name;
     private String password;
     private String role;
+    private String mobile_number;
     private String qualification;
     private Integer yearsOfExperience;
     private String subjectExpertise;
