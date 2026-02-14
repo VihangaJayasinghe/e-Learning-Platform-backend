@@ -26,6 +26,7 @@ import com.Learn.ELP_backend.model.User;
 import com.Learn.ELP_backend.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
@@ -40,12 +41,12 @@ public class UserController {
     }
 
     @PostMapping("/register/student")
-    public ResponseEntity<?> registerStudent(@RequestBody StudentRegisterDTO dto) {
+    public ResponseEntity<?> registerStudent(@Valid @RequestBody StudentRegisterDTO dto) {
         return ResponseEntity.ok(userService.registerStudent(dto));
     }
 
     @PostMapping("/register/teacher")
-    public ResponseEntity<?> registerTeacher(@RequestBody TeacherRegisterDTO dto) {
+    public ResponseEntity<?> registerTeacher(@Valid @RequestBody TeacherRegisterDTO dto) {
         return ResponseEntity.ok(userService.registerTeacher(dto));
     }
 
