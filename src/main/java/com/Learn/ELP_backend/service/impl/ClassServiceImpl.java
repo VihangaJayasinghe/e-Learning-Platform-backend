@@ -4,6 +4,8 @@ import com.Learn.ELP_backend.model.Class;
 import com.Learn.ELP_backend.model.ClassMonth;
 import com.Learn.ELP_backend.model.ClassStatus;
 import com.Learn.ELP_backend.repository.ClassRepository;
+import com.Learn.ELP_backend.repository.UserRepository;
+import com.Learn.ELP_backend.model.User;
 import com.Learn.ELP_backend.service.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,9 @@ public class ClassServiceImpl implements ClassService {
 
     @Autowired
     private ClassRepository classRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public Class createClass(Class classObj) {
@@ -36,8 +41,12 @@ public class ClassServiceImpl implements ClassService {
     }
 
     @Override
-    public List<Class> getClassesByInstructor(String instructorId) {
-        return classRepository.findByInstructorId(instructorId);
+    public List<Class> getClassesByInstructor(String username) {
+        User teacher = userRepository.findByUsername(username);
+        if (teacher == null) {
+            throw new RuntimeException("Teacher not found with username: " + username);
+        }
+        return classRepository.findByTeacher(teacher);
     }
 
     @Override

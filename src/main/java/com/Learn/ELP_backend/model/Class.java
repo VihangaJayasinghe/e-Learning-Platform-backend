@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 
 import java.time.YearMonth;
@@ -18,25 +19,26 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Document(collection = "classes")
-@CompoundIndex(name = "instructor_status", def = "{'instructorId': 1, 'status': 1}")
+@CompoundIndex(name = "instructor_status", def = "{'teacher': 1, 'status': 1}")
 public class Class {
     @Id
     private String id;
-    
+
     private String className;
     private String description;
-    private String instructorId;
+    @DBRef
+    private User teacher;
     private Double monthlyPrice;
-    
-    private String startMonth;        // String format: "2024-03"
+
+    private String startMonth; // String format: "2024-03"
     private Integer durationMonths;
-    
+
     @Builder.Default
     private List<ClassMonth> months = new ArrayList<>();
-    
+
     @Builder.Default
     private LocalDateTime createdDate = LocalDateTime.now();
-    
+
     @Builder.Default
     private ClassStatus status = ClassStatus.DRAFT;
 
@@ -51,42 +53,42 @@ public class Class {
     public void initializeMonths() {
         this.months = new ArrayList<>();
         YearMonth start = YearMonth.parse(this.startMonth);
-        
+
         for (int i = 0; i < durationMonths; i++) {
             YearMonth month = start.plusMonths(i);
             months.add(ClassMonth.builder()
-                .yearMonth(month.toString())
-                .displayName(month.getMonth().toString() + " " + month.getYear())
-                .videoIds(new ArrayList<>())
-                .isReleased(false)
-                .releaseDate(null)
-                .build());
+                    .yearMonth(month.toString())
+                    .displayName(month.getMonth().toString() + " " + month.getYear())
+                    .videoIds(new ArrayList<>())
+                    .isReleased(false)
+                    .releaseDate(null)
+                    .build());
         }
     }
-    
+
     // Calculate end month
     public String getEndMonth() {
         YearMonth start = YearMonth.parse(this.startMonth);
         YearMonth end = start.plusMonths(durationMonths - 1);
         return end.toString();
     }
-    
+
     // Extend class duration
     public void extendDuration(int additionalMonths) {
         YearMonth currentEnd = YearMonth.parse(getEndMonth());
         for (int i = 1; i <= additionalMonths; i++) {
             YearMonth newMonth = currentEnd.plusMonths(i);
             months.add(ClassMonth.builder()
-                .yearMonth(newMonth.toString())
-                .displayName(newMonth.getMonth().toString() + " " + newMonth.getYear())
-                .videoIds(new ArrayList<>())
-                .isReleased(false)
-                .releaseDate(null)
-                .build());
+                    .yearMonth(newMonth.toString())
+                    .displayName(newMonth.getMonth().toString() + " " + newMonth.getYear())
+                    .videoIds(new ArrayList<>())
+                    .isReleased(false)
+                    .releaseDate(null)
+                    .build());
         }
         this.durationMonths += additionalMonths;
     }
-    
+
     // Find month by string
     public ClassMonth findMonth(String yearMonth) {
         return months.stream()
