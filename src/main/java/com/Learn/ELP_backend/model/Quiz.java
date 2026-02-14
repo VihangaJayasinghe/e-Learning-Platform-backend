@@ -1,31 +1,35 @@
 package com.Learn.ELP_backend.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import lombok.Builder;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Document(collection = "documents")
-public class Documents {
+@lombok.Builder
+@Document(collection = "quizzes")
+public class Quiz {
     @Id
-    private String Id;
+    private String id;
 
-    private String documentName;
+    private String quizTitle;
     private String description;
-    private String fileName;
-    private Long fileSize;
-    private String contentType;
-    private String cloudinaryUrl;
-    private String uploadedBy;
+    private List<Question> questions;
+    private String createdBy;
     private String classId;
+    private String monthId;
 
     @Builder.Default
-     private LocalDateTime uploadDate = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    private String className;
+    private String monthDisplayName;
+
 }

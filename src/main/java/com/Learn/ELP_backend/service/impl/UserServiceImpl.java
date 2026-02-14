@@ -98,6 +98,7 @@ public class UserServiceImpl implements UserService {
         teacher.setYearsOfExperience(dto.getYearsOfExperience());
         teacher.setSubjectExpertise(dto.getSubjectExpertise());
         teacher.setBio(dto.getBio());
+        teacher.setMobile_number(dto.getMobile_number());
 
         return userRepository.save(teacher);
     }

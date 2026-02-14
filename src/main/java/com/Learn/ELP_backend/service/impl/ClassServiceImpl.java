@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -160,4 +161,60 @@ public class ClassServiceImpl implements ClassService {
 
         return month.getVideoIds();
     }
+
+    public List<String> getMonthQuizIds(String classId, String yearMonth) {
+        Class classObj = getClassById(classId);
+        ClassMonth month = classObj.findMonth(yearMonth);
+
+        if (month == null) {
+            throw new RuntimeException("Month not found in class: " + yearMonth);
+        }
+
+        return month.getQuizIds();
+    }
+
+    @Override
+    public Class addDocumentToMonth(String classId, String yearMonth, String documentId) {
+    Class classObj = classRepository.findById(classId)
+            .orElseThrow(() -> new RuntimeException("Class not found: " + classId));
+    
+    ClassMonth month = classObj.getMonths().stream()
+            .filter(m -> m.getYearMonth().equals(yearMonth))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Month not found: " + yearMonth));
+    
+    // Check if document already exists in the month
+    if (!month.getDocumentIds().contains(documentId)) {
+        month.getDocumentIds().add(documentId);
+    }
+    
+    return classRepository.save(classObj);
+}
+
+@Override
+public Class removeDocumentFromMonth(String classId, String yearMonth, String documentId) {
+    Class classObj = classRepository.findById(classId)
+            .orElseThrow(() -> new RuntimeException("Class not found: " + classId));
+    
+    ClassMonth month = classObj.getMonths().stream()
+            .filter(m -> m.getYearMonth().equals(yearMonth))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Month not found: " + yearMonth));
+    
+    month.getDocumentIds().remove(documentId);
+    
+    return classRepository.save(classObj);
+}
+
+@Override
+public List<String> getMonthDocuments(String classId, String yearMonth) {
+    Class classObj = classRepository.findById(classId)
+            .orElseThrow(() -> new RuntimeException("Class not found: " + classId));
+    
+    return classObj.getMonths().stream()
+            .filter(m -> m.getYearMonth().equals(yearMonth))
+            .findFirst()
+            .map(ClassMonth::getDocumentIds)
+            .orElse(Collections.emptyList());
+}
 }

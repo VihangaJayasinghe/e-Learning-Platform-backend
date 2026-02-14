@@ -100,6 +100,25 @@ public class ClassController {
         return ResponseEntity.ok(updatedClass);
     }
 
+    // Month document management
+    @PostMapping("/{classId}/months/{yearMonth}/documents/{documentId}")
+    public ResponseEntity<Class> addDocumentToMonth(
+        @PathVariable String classId,
+        @PathVariable String yearMonth,
+        @PathVariable String documentId) {
+    Class updatedClass = classService.addDocumentToMonth(classId, yearMonth, documentId);
+    return ResponseEntity.ok(updatedClass);
+}
+
+    @DeleteMapping("/{classId}/months/{yearMonth}/documents/{documentId}")
+    public ResponseEntity<Class> removeDocumentFromMonth(
+        @PathVariable String classId,
+        @PathVariable String yearMonth,
+        @PathVariable String documentId) {
+    Class updatedClass = classService.removeDocumentFromMonth(classId, yearMonth, documentId);
+    return ResponseEntity.ok(updatedClass);
+} 
+
     // Month release management
     @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PostMapping("/{classId}/months/{yearMonth}/release")
@@ -137,5 +156,14 @@ public class ClassController {
             @PathVariable String yearMonth) {
         List<String> videoIds = classService.getMonthVideos(classId, yearMonth);
         return ResponseEntity.ok(videoIds);
+    }
+
+    // Get month's documents
+    @GetMapping("/{classId}/months/{yearMonth}/documents")
+    public ResponseEntity<List<String>> getMonthDocuments(
+        @PathVariable String classId,
+        @PathVariable String yearMonth) {
+    List<String> documentIds = classService.getMonthDocuments(classId, yearMonth);
+    return ResponseEntity.ok(documentIds);
     }
 }

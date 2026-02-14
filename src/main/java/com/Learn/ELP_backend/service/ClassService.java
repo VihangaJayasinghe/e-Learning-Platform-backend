@@ -32,9 +32,22 @@ public interface ClassService {
 
     Class unreleaseMonth(String classId, String yearMonth);
 
+    
     // Class duration management
     Class extendClassDuration(String classId, int additionalMonths);
 
     // Get specific month's videos
     List<String> getMonthVideos(String classId, String yearMonth);
+
+    // Month document management
+    Class addDocumentToMonth(String classId, String yearMonth, String documentId);
+    Class removeDocumentFromMonth(String classId, String yearMonth, String documentId);
+
+    // Get specific month's documents
+    List<String> getMonthDocuments(String classId, String yearMonth);
+
+
+
+
+
 }
