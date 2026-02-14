@@ -49,9 +49,9 @@ public class ClassController {
     }
 
     @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN') or hasRole('STUDENT')")
-    @GetMapping("/instructor/{instructorId}")
-    public ResponseEntity<List<Class>> getClassesByInstructor(@PathVariable String instructorId) {
-        List<Class> classes = classService.getClassesByInstructor(instructorId);
+    @GetMapping("/instructor/{username}")
+    public ResponseEntity<List<Class>> getClassesByInstructor(@PathVariable String username) {
+        List<Class> classes = classService.getClassesByInstructor(username);
         return ResponseEntity.ok(classes);
     }
 

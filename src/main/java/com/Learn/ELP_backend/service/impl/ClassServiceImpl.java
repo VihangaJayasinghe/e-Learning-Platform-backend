@@ -40,9 +40,11 @@ public class ClassServiceImpl implements ClassService {
     }
 
     @Override
-    public List<Class> getClassesByInstructor(String instructorId) {
-        User teacher = userRepository.findById(instructorId)
-                .orElseThrow(() -> new RuntimeException("Teacher not found with id: " + instructorId));
+    public List<Class> getClassesByInstructor(String username) {
+        User teacher = userRepository.findByUsername(username);
+        if (teacher == null) {
+            throw new RuntimeException("Teacher not found with username: " + username);
+        }
         return classRepository.findByTeacher(teacher);
     }
 
