@@ -49,7 +49,7 @@ public class ReviewServiceImpl implements ReviewService {
         } else if (review.getTargetType() == Review.ReviewTargetType.CLASS) {
             Class classObj = classRepository.findById(review.getTargetId()).orElse(null);
             if (classObj != null) {
-                review.setInstructorId(classObj.getInstructorId());
+                review.setInstructorId(classObj.getInstructorName());
             }
         }
         
