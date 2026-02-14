@@ -101,6 +101,7 @@ public class ClassController {
     }
 
     // Month document management
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @PostMapping("/{classId}/months/{yearMonth}/documents/{documentId}")
     public ResponseEntity<Class> addDocumentToMonth(
         @PathVariable String classId,
@@ -110,6 +111,7 @@ public class ClassController {
     return ResponseEntity.ok(updatedClass);
 }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @DeleteMapping("/{classId}/months/{yearMonth}/documents/{documentId}")
     public ResponseEntity<Class> removeDocumentFromMonth(
         @PathVariable String classId,
@@ -120,6 +122,7 @@ public class ClassController {
 } 
 
     // Month release management
+
     @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PostMapping("/{classId}/months/{yearMonth}/release")
     public ResponseEntity<Class> releaseMonth(
@@ -159,6 +162,7 @@ public class ClassController {
     }
 
     // Get month's documents
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN') or hasRole('STUDENT')")
     @GetMapping("/{classId}/months/{yearMonth}/documents")
     public ResponseEntity<List<String>> getMonthDocuments(
         @PathVariable String classId,
