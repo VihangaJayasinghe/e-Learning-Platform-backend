@@ -26,6 +26,7 @@ import com.Learn.ELP_backend.model.User;
 import com.Learn.ELP_backend.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
@@ -40,12 +41,12 @@ public class UserController {
     }
 
     @PostMapping("/register/student")
-    public ResponseEntity<?> registerStudent(@RequestBody StudentRegisterDTO dto) {
+    public ResponseEntity<?> registerStudent(@Valid @RequestBody StudentRegisterDTO dto) {
         return ResponseEntity.ok(userService.registerStudent(dto));
     }
 
     @PostMapping("/register/teacher")
-    public ResponseEntity<?> registerTeacher(@RequestBody TeacherRegisterDTO dto) {
+    public ResponseEntity<?> registerTeacher(@Valid @RequestBody TeacherRegisterDTO dto) {
         return ResponseEntity.ok(userService.registerTeacher(dto));
     }
 
@@ -84,7 +85,7 @@ public class UserController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordDTO forgotPasswordDTO) {
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordDTO forgotPasswordDTO) {
         try {
             userService.initiatePasswordReset(forgotPasswordDTO.getEmail());
             return ResponseEntity.ok("Password reset instructions sent to your email");
@@ -95,7 +96,7 @@ public class UserController {
     }
     
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDTO resetPasswordDTO) {
         try {
             userService.resetPassword(resetPasswordDTO.getToken(), resetPasswordDTO.getNewPassword(), resetPasswordDTO.getConfirmPassword());
             return ResponseEntity.ok("Password reset successfully");
@@ -105,7 +106,7 @@ public class UserController {
     }
     
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO, Principal principal) {
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO, Principal principal) {
         try {
             userService.changePassword(principal.getName(), changePasswordDTO.getCurrentPassword(), changePasswordDTO.getNewPassword());
             return ResponseEntity.ok("Password changed successfully");
