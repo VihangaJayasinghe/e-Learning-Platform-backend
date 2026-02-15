@@ -12,25 +12,27 @@ import com.Learn.ELP_backend.service.CloudinaryStorageService;
 import com.Learn.ELP_backend.service.DocumentService;
 
 @Service
-public class DocumentServiceImpl implements DocumentService{
-@Autowired
-private DocumentRepository documentRepository;
+public class DocumentServiceImpl implements DocumentService {
+    @Autowired
+    private DocumentRepository documentRepository;
 
-@Autowired
-private CloudinaryStorageService cloudinaryStorageService;
+    @Autowired
+    private CloudinaryStorageService cloudinaryStorageService;
 
-@Override
-public Documents uploadDocument(MultipartFile file, String name, String description, String uploadedBy, String classId) {
-    try {
-            if (file.isEmpty()) throw new RuntimeException("File is empty");
+    @Override
+    public Documents uploadDocument(MultipartFile file, String name, String description, String uploadedBy,
+            String classId) {
+        try {
+            if (file.isEmpty())
+                throw new RuntimeException("File is empty");
 
             String contentType = file.getContentType();
             if (!contentType.equals("application/pdf") &&
-                !contentType.equals("application/vnd.openxmlformats-officedocument.presentationml.presentation") &&
-                !contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+                    !contentType.equals("application/vnd.openxmlformats-officedocument.presentationml.presentation") &&
+                    !contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
                 throw new RuntimeException("Invalid file type");
-                }
-         // Upload to Cloudinary as raw
+            }
+            // Upload to Cloudinary as raw
             String cloudinaryUrl = cloudinaryStorageService.uploadRaw(file);
 
             Documents doc = Documents.builder()
@@ -66,12 +68,16 @@ public Documents uploadDocument(MultipartFile file, String name, String descript
         Documents doc = documentRepository.findById(id).orElse(null);
         if (doc != null) {
             try {
-            cloudinaryStorageService.deleteRaw(doc.getCloudinaryUrl());
-            documentRepository.deleteById(id);
-            }
-            catch (Exception e) {
+                cloudinaryStorageService.deleteRaw(doc.getCloudinaryUrl());
+                documentRepository.deleteById(id);
+            } catch (Exception e) {
                 throw new RuntimeException("Failed to delete document from storage: " + e.getMessage());
             }
         }
+    }
+
+    @Override
+    public List<Documents> getDocumentsByTeacher(String username) {
+        return documentRepository.findByUploadedBy(username);
     }
 }

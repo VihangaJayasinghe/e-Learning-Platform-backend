@@ -7,6 +7,8 @@ import com.Learn.ELP_backend.model.Documents;
 import java.util.List;
 
 @Repository
-public interface DocumentRepository extends MongoRepository<Documents, String>{
+public interface DocumentRepository extends MongoRepository<Documents, String> {
     List<Documents> findByClassId(String classId);
+
+    List<Documents> findByUploadedBy(String uploadedBy);
 }

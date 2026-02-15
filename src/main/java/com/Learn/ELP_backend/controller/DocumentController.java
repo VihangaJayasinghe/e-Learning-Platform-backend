@@ -28,12 +28,12 @@ public class DocumentController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @PostMapping("/upload")
     public ResponseEntity<Documents> uploadDocument(
-        @RequestParam("file") MultipartFile file,
-        @RequestParam("name") String name,
-        @RequestParam("description") String description,
-        @RequestParam("uploadedBy") String uploadedBy,
-        @RequestParam("classId") String classId) {
-    Documents doc = documentService.uploadDocument(file, name, description, uploadedBy, classId);
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("uploadedBy") String uploadedBy,
+            @RequestParam("classId") String classId) {
+        Documents doc = documentService.uploadDocument(file, name, description, uploadedBy, classId);
         return ResponseEntity.ok(doc);
     }
 
@@ -48,7 +48,8 @@ public class DocumentController {
     @GetMapping("/{id}")
     public ResponseEntity<Documents> getDocumentById(@PathVariable String id) {
         Documents doc = documentService.getDocumentById(id);
-        if (doc != null) return ResponseEntity.ok(doc);
+        if (doc != null)
+            return ResponseEntity.ok(doc);
         return ResponseEntity.notFound().build();
     }
 
@@ -59,4 +60,11 @@ public class DocumentController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
+    @GetMapping("/teacher/my-documents")
+    public ResponseEntity<List<Documents>> getMyDocuments(
+            org.springframework.security.core.Authentication authentication) {
+        String username = authentication.getName();
+        return ResponseEntity.ok(documentService.getDocumentsByTeacher(username));
+    }
 }
