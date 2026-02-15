@@ -16,19 +16,19 @@ public class VideoServiceImpl implements VideoService {
 
     @Autowired
     private VideoRepository videoRepository;
-    
+
     @Autowired
     private CloudinaryStorageService cloudinaryStorageService;
 
     @Override
-    public Video uploadVideo(MultipartFile file, String name, String description) {
+    public Video uploadVideo(MultipartFile file, String name, String description, String uploadedBy) {
         try {
             if (file.isEmpty()) {
                 throw new RuntimeException("File is empty");
             }
-            
+
             String cloudinaryUrl = cloudinaryStorageService.uploadVideo(file);
-            
+
             Video video = Video.builder()
                     .videoName(name)
                     .description(description)
@@ -36,12 +36,12 @@ public class VideoServiceImpl implements VideoService {
                     .fileSize(file.getSize())
                     .contentType(file.getContentType())
                     .firebaseUrl(cloudinaryUrl)
-                    .uploadedBy("user123")
+                    .uploadedBy(uploadedBy)
                     .uploadDate(LocalDateTime.now())
                     .build();
-            
+
             return videoRepository.save(video);
-            
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload video: " + e.getMessage());
         }
@@ -79,11 +79,11 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public List<Video> getVideosByUploadedBy(String uploadedBy) {
-   try {
+        try {
             List<Video> videos = videoRepository.findByUploadedBy(uploadedBy);
             return videos;
         } catch (Exception e) {
             throw new RuntimeException("Error retrieving videos by uploader: " + e.getMessage());
         }
-}
+    }
 }
