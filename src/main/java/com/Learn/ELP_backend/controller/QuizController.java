@@ -52,7 +52,7 @@ public class QuizController {
                 question.setCorrectAnswerIndex(-1); // Hide correct answer
             });
         }
-    
+
         return ResponseEntity.ok(quiz);
     }
 
@@ -65,32 +65,37 @@ public class QuizController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
     @GetMapping("/class/{classId}/month/{monthId}")
     public ResponseEntity<List<Quiz>> getQuizzesByClassAndMonth(@PathVariable String classId,
-                                                                @PathVariable String monthId) {
+            @PathVariable String monthId) {
         return ResponseEntity.ok(quizService.getQuizzesByClassAndMonth(classId, monthId));
     }
 
-    //Question Management
+    // Question Management
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @PostMapping("/{quizId}/add-question")
-    public ResponseEntity<Quiz> addQuestionToQuiz(@PathVariable String quizId, 
-                                                  @RequestBody Question question) {
+    public ResponseEntity<Quiz> addQuestionToQuiz(@PathVariable String quizId,
+            @RequestBody Question question) {
         return ResponseEntity.ok(quizService.addQuestionToQuiz(quizId, question));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @PutMapping("/{quizId}/update-question/{questionId}")
     public ResponseEntity<Quiz> updateQuestionInQuiz(@PathVariable String quizId,
-                                                     @PathVariable String questionId,
-                                                     @RequestBody Question questionUpdate) {
+            @PathVariable String questionId,
+            @RequestBody Question questionUpdate) {
         return ResponseEntity.ok(quizService.updateQuestionInQuiz(quizId, questionId, questionUpdate));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @DeleteMapping("/{quizId}/delete-question/{questionId}")
     public ResponseEntity<Quiz> deleteQuestionFromQuiz(@PathVariable String quizId,
-                                                       @PathVariable String questionId) {
+            @PathVariable String questionId) {
         return ResponseEntity.ok(quizService.deleteQuestionFromQuiz(quizId, questionId));
     }
 
-
+    @PreAuthorize("hasRole('TEACHER')")
+    @GetMapping("/teacher/my-quizzes")
+    public ResponseEntity<List<Quiz>> getMyQuizzes(org.springframework.security.core.Authentication authentication) {
+        String username = authentication.getName();
+        return ResponseEntity.ok(quizService.getQuizzesByTeacher(username));
+    }
 }

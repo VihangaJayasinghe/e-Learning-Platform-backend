@@ -45,9 +45,9 @@ public class QuizServiceImpl implements QuizService {
             for (Question question : quiz.getQuestions()) {
                 if (question.getQuestionId() == null || question.getQuestionId().isEmpty()) {
                     question.setQuestionId(UUID.randomUUID().toString());
+                }
             }
         }
-    }
 
         // Save quiz first
         Quiz savedQuiz = quizRepository.save(quiz);
@@ -78,27 +78,27 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-public Quiz updateQuiz(String id, Quiz quizUpdate) {
-    Quiz existingQuiz = getQuizById(id);
+    public Quiz updateQuiz(String id, Quiz quizUpdate) {
+        Quiz existingQuiz = getQuizById(id);
 
-    if (quizUpdate.getQuizTitle() != null) {
-        existingQuiz.setQuizTitle(quizUpdate.getQuizTitle());
-    }
-    if (quizUpdate.getDescription() != null) {
-        existingQuiz.setDescription(quizUpdate.getDescription());
-    }
-    if (quizUpdate.getQuestions() != null) {
-        // Generate IDs for any new questions without IDs
-        for (Question question : quizUpdate.getQuestions()) {
-            if (question.getQuestionId() == null || question.getQuestionId().isEmpty()) {
-                question.setQuestionId(UUID.randomUUID().toString());
-            }
+        if (quizUpdate.getQuizTitle() != null) {
+            existingQuiz.setQuizTitle(quizUpdate.getQuizTitle());
         }
-        existingQuiz.setQuestions(quizUpdate.getQuestions());
-    }
+        if (quizUpdate.getDescription() != null) {
+            existingQuiz.setDescription(quizUpdate.getDescription());
+        }
+        if (quizUpdate.getQuestions() != null) {
+            // Generate IDs for any new questions without IDs
+            for (Question question : quizUpdate.getQuestions()) {
+                if (question.getQuestionId() == null || question.getQuestionId().isEmpty()) {
+                    question.setQuestionId(UUID.randomUUID().toString());
+                }
+            }
+            existingQuiz.setQuestions(quizUpdate.getQuestions());
+        }
 
-    return quizRepository.save(existingQuiz);
-}
+        return quizRepository.save(existingQuiz);
+    }
 
     @Override
     public void deleteQuiz(String id) {
@@ -125,8 +125,8 @@ public Quiz updateQuiz(String id, Quiz quizUpdate) {
         Quiz quiz = getQuizById(quizId);
 
         if (quiz.getQuestions() == null) {
-        quiz.setQuestions(new ArrayList<>());
-    }
+            quiz.setQuestions(new ArrayList<>());
+        }
 
         question.setQuestionId(UUID.randomUUID().toString());
         quiz.getQuestions().add(question);
@@ -149,7 +149,7 @@ public Quiz updateQuiz(String id, Quiz quizUpdate) {
         if (questionUpdate.getOptions() != null) {
             existing.setOptions(questionUpdate.getOptions());
         }
-       
+
         if (questionUpdate.getCorrectAnswerIndex() != null) {
             existing.setCorrectAnswerIndex(questionUpdate.getCorrectAnswerIndex());
         }
@@ -169,5 +169,10 @@ public Quiz updateQuiz(String id, Quiz quizUpdate) {
         }
 
         return quizRepository.save(quiz);
+    }
+
+    @Override
+    public List<Quiz> getQuizzesByTeacher(String username) {
+        return quizRepository.findByCreatedBy(username);
     }
 }

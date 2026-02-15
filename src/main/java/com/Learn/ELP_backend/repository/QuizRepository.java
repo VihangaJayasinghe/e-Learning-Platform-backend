@@ -9,6 +9,8 @@ import java.util.List;
 @Repository
 public interface QuizRepository extends MongoRepository<Quiz, String> {
     List<Quiz> findByClassId(String classId);
-    List<Quiz> findByClassIdAndMonthId(String classId, String monthId);
-}
 
+    List<Quiz> findByClassIdAndMonthId(String classId, String monthId);
+
+    List<Quiz> findByCreatedBy(String createdBy);
+}
