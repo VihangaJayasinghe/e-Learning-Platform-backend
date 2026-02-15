@@ -62,7 +62,7 @@ public class ClassController {
         return ResponseEntity.ok(updatedClass);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClass(@PathVariable String id) {
         classService.deleteClass(id);
@@ -142,7 +142,7 @@ public class ClassController {
     }
 
     // Class duration management
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PatchMapping("/{id}/extend")
     public ResponseEntity<Class> extendClassDuration(
             @PathVariable String id,
