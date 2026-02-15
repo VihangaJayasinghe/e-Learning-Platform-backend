@@ -68,6 +68,13 @@ public class VideoController {
         return ResponseEntity.notFound().build();
     }
 
+    // Get videos by user
+    @GetMapping("/user/{username}")
+    public ResponseEntity<List<Video>> getVideosByUser(@PathVariable String username) {
+        List<Video> videos = videoService.getVideosByUploadedBy(username);
+        return ResponseEntity.ok(videos);
+    }
+
     // Delete video
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVideo(@PathVariable String id) {
