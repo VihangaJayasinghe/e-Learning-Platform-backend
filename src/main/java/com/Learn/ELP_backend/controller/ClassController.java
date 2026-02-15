@@ -62,7 +62,7 @@ public class ClassController {
         return ResponseEntity.ok(updatedClass);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClass(@PathVariable String id) {
         classService.deleteClass(id);
@@ -70,8 +70,8 @@ public class ClassController {
     }
 
     // Class status management
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
+    @PutMapping("/{id}/status")
     public ResponseEntity<Class> updateClassStatus(
             @PathVariable String id,
             @RequestParam ClassStatus status) {
@@ -101,25 +101,28 @@ public class ClassController {
     }
 
     // Month document management
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @PostMapping("/{classId}/months/{yearMonth}/documents/{documentId}")
     public ResponseEntity<Class> addDocumentToMonth(
-        @PathVariable String classId,
-        @PathVariable String yearMonth,
-        @PathVariable String documentId) {
-    Class updatedClass = classService.addDocumentToMonth(classId, yearMonth, documentId);
-    return ResponseEntity.ok(updatedClass);
-}
+            @PathVariable String classId,
+            @PathVariable String yearMonth,
+            @PathVariable String documentId) {
+        Class updatedClass = classService.addDocumentToMonth(classId, yearMonth, documentId);
+        return ResponseEntity.ok(updatedClass);
+    }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @DeleteMapping("/{classId}/months/{yearMonth}/documents/{documentId}")
     public ResponseEntity<Class> removeDocumentFromMonth(
-        @PathVariable String classId,
-        @PathVariable String yearMonth,
-        @PathVariable String documentId) {
-    Class updatedClass = classService.removeDocumentFromMonth(classId, yearMonth, documentId);
-    return ResponseEntity.ok(updatedClass);
-} 
+            @PathVariable String classId,
+            @PathVariable String yearMonth,
+            @PathVariable String documentId) {
+        Class updatedClass = classService.removeDocumentFromMonth(classId, yearMonth, documentId);
+        return ResponseEntity.ok(updatedClass);
+    }
 
     // Month release management
+
     @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PostMapping("/{classId}/months/{yearMonth}/release")
     public ResponseEntity<Class> releaseMonth(
@@ -139,8 +142,8 @@ public class ClassController {
     }
 
     // Class duration management
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}/extend")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
+    @PostMapping("/{id}/extend")
     public ResponseEntity<Class> extendClassDuration(
             @PathVariable String id,
             @RequestParam int additionalMonths) {
@@ -159,11 +162,12 @@ public class ClassController {
     }
 
     // Get month's documents
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN') or hasRole('STUDENT')")
     @GetMapping("/{classId}/months/{yearMonth}/documents")
     public ResponseEntity<List<String>> getMonthDocuments(
-        @PathVariable String classId,
-        @PathVariable String yearMonth) {
-    List<String> documentIds = classService.getMonthDocuments(classId, yearMonth);
-    return ResponseEntity.ok(documentIds);
+            @PathVariable String classId,
+            @PathVariable String yearMonth) {
+        List<String> documentIds = classService.getMonthDocuments(classId, yearMonth);
+        return ResponseEntity.ok(documentIds);
     }
 }

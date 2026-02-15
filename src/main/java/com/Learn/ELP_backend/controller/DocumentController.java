@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,11 +19,13 @@ import com.Learn.ELP_backend.service.DocumentService;
 
 @RestController
 @RequestMapping("/api/documents")
+
 public class DocumentController {
 
     @Autowired
     private DocumentService documentService;
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @PostMapping("/upload")
     public ResponseEntity<Documents> uploadDocument(
         @RequestParam("file") MultipartFile file,
@@ -34,12 +37,14 @@ public class DocumentController {
         return ResponseEntity.ok(doc);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
     @GetMapping("/class/{classId}")
     public ResponseEntity<List<Documents>> getDocumentsByClass(@PathVariable String classId) {
         List<Documents> docs = documentService.getDocumentsByClass(classId);
         return ResponseEntity.ok(docs);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
     @GetMapping("/{id}")
     public ResponseEntity<Documents> getDocumentById(@PathVariable String id) {
         Documents doc = documentService.getDocumentById(id);
@@ -47,6 +52,7 @@ public class DocumentController {
         return ResponseEntity.notFound().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDocument(@PathVariable String id) {
         documentService.deleteDocument(id);
