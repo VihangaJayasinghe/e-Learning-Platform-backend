@@ -70,7 +70,7 @@ public class ClassController {
     }
 
     // Class status management
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<Class> updateClassStatus(
             @PathVariable String id,
