@@ -143,7 +143,7 @@ public class ClassController {
 
     // Class duration management
     @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
-    @PatchMapping("/{id}/extend")
+    @PostMapping("/{id}/extend")
     public ResponseEntity<Class> extendClassDuration(
             @PathVariable String id,
             @RequestParam int additionalMonths) {
