@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/videos")
@@ -23,14 +24,16 @@ public class VideoController {
     public ResponseEntity<Video> uploadVideo(
             @RequestParam("file") MultipartFile file,
             @RequestParam("name") String name,
-            @RequestParam("description") String description) {
-        
-        Video video = videoService.uploadVideo(file, name, description);
+            @RequestParam("description") String description,
+            Authentication authentication) {
+
+        String uploadedBy = authentication.getName();
+        Video video = videoService.uploadVideo(file, name, description, uploadedBy);
         return ResponseEntity.ok(video);
     }
 
     // Create test video (without file upload)
-    
+
     @PostMapping("/test")
     public ResponseEntity<Video> createTestVideo() {
         Video testVideo = Video.builder()
@@ -43,7 +46,7 @@ public class VideoController {
                 .uploadedBy("test-user")
                 .uploadDate(LocalDateTime.now())
                 .build();
-        
+
         Video savedVideo = videoService.uploadTestVideo(testVideo);
         return ResponseEntity.ok(savedVideo);
     }
@@ -63,6 +66,13 @@ public class VideoController {
             return ResponseEntity.ok(video);
         }
         return ResponseEntity.notFound().build();
+    }
+
+    // Get videos by user
+    @GetMapping("/user/{username}")
+    public ResponseEntity<List<Video>> getVideosByUser(@PathVariable String username) {
+        List<Video> videos = videoService.getVideosByUploadedBy(username);
+        return ResponseEntity.ok(videos);
     }
 
     // Delete video
