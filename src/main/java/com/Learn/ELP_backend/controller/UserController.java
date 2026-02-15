@@ -78,6 +78,7 @@ public class UserController {
         // 4. Send JSON response with Name and Role
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("message", "Login successful");
+        responseBody.put("id", fullUser.getId());
         responseBody.put("username", fullUser.getUsername());
         responseBody.put("role", fullUser.getRole());
 
@@ -131,6 +132,7 @@ public class UserController {
         User user = userRepository.findByUsername(principal.getName());
         
         Map<String, Object> response = new HashMap<>();
+        response.put("id", user.getId());
         response.put("username", user.getUsername());
         response.put("role", user.getRole());
         response.put("email", user.getEmail());
