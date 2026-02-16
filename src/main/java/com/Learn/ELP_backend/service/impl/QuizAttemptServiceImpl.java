@@ -16,13 +16,13 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
     @Autowired
     private QuizAttemptRepository quizAttemptRepository;
-    
+
     @Autowired
     private QuizRepository quizRepository;
-    
+
     @Autowired
     private QuizResultRepository quizResultRepository;
-    
+
     @Override
     public QuizAttempt startQuizAttempt(String quizId, String studentId, String studentName) {
         // Get quiz
@@ -32,7 +32,8 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         // Check if student has already attempted this quiz
         List<QuizAttempt> existingAttempts = quizAttemptRepository.findByQuizIdAndStudentId(quizId, studentId);
         if (!existingAttempts.isEmpty()) {
-            // For now, allow multiple attempts. Hoping to change it later based on the requirement........
+            // For now, allow multiple attempts. Hoping to change it later based on the
+            // requirement........
         }
 
         // Create quiz attempt with questions (without answers)
@@ -64,27 +65,27 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         return quizAttemptRepository.save(attempt);
     }
 
-     @Override
+    @Override
     public QuizAttempt submitAnswer(String attemptId, String questionId, int selectedAnswerIndex) {
         QuizAttempt attempt = quizAttemptRepository.findById(attemptId)
                 .orElseThrow(() -> new RuntimeException("Quiz attempt not found: " + attemptId));
-        
+
         if (attempt.isCompleted()) {
             throw new RuntimeException("Cannot submit answer: Quiz already completed");
         }
-        
+
         // Find the question attempt
         QuizAttempt.QuestionAttempt questionAttempt = attempt.getQuestionAttempts().stream()
                 .filter(qa -> qa.getQuestionId().equals(questionId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Question not found in this attempt: " + questionId));
-        
+
         // Update the answer
         questionAttempt.setSelectedAnswerIndex(selectedAnswerIndex);
-        
+
         // Check if answer is correct
         questionAttempt.setCorrect(selectedAnswerIndex == questionAttempt.getCorrectAnswerIndex());
-        
+
         return quizAttemptRepository.save(attempt);
     }
 
@@ -92,11 +93,11 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     public QuizAttempt completeQuizAttempt(String attemptId) {
         QuizAttempt attempt = quizAttemptRepository.findById(attemptId)
                 .orElseThrow(() -> new RuntimeException("Quiz attempt not found: " + attemptId));
-        
+
         if (attempt.isCompleted()) {
             throw new RuntimeException("Quiz already completed");
         }
-        
+
         // Calculate score
         int correctAnswers = 0;
         for (QuizAttempt.QuestionAttempt qa : attempt.getQuestionAttempts()) {
@@ -104,19 +105,19 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 correctAnswers++;
             }
         }
-        
+
         attempt.setCorrectAnswers(correctAnswers);
-        attempt.setScore(attempt.getTotalQuestions() > 0 ? 
-                (double) correctAnswers / attempt.getTotalQuestions() * 100 : 0);
+        attempt.setScore(
+                attempt.getTotalQuestions() > 0 ? (double) correctAnswers / attempt.getTotalQuestions() * 100 : 0);
         attempt.setCompleted(true);
         attempt.setCompletedAt(LocalDateTime.now());
-        
+
         // Save the attempt
         QuizAttempt savedAttempt = quizAttemptRepository.save(attempt);
-        
+
         // Create/update quiz result (optional)
         createOrUpdateQuizResult(savedAttempt);
-        
+
         return savedAttempt;
     }
 
@@ -124,7 +125,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         // Check if result already exists
         QuizResult existingResult = quizResultRepository.findByQuizIdAndStudentId(
                 attempt.getQuizId(), attempt.getStudentId());
-        
+
         if (existingResult == null) {
             // Create new result
             QuizResult result = QuizResult.builder()
@@ -150,101 +151,107 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         }
     }
 
-     @Override
+    @Override
     public QuizAttempt getQuizAttemptById(String attemptId) {
         return quizAttemptRepository.findById(attemptId)
                 .orElseThrow(() -> new RuntimeException("Quiz attempt not found: " + attemptId));
     }
-    
+
     @Override
     public List<QuizAttempt> getStudentAttempts(String studentId) {
         return quizAttemptRepository.findByStudentId(studentId);
     }
-    
+
     @Override
     public List<QuizAttempt> getQuizAttempts(String quizId) {
         return quizAttemptRepository.findByQuizId(quizId);
     }
-    
+
     @Override
     public List<QuizAttempt> getStudentQuizAttempts(String quizId, String studentId) {
         return quizAttemptRepository.findByQuizIdAndStudentId(quizId, studentId);
     }
 
-     @Override
+    @Override
     public List<QuizResult> getQuizResults(String quizId) {
         List<QuizResult> results = quizResultRepository.findByQuizId(quizId);
-        
+
         // Sort by score (descending)
         results.sort((a, b) -> Double.compare(b.getScorePercentage(), a.getScorePercentage()));
-        
+
         // Add ranks
         for (int i = 0; i < results.size(); i++) {
             results.get(i).setRankInClass(i + 1);
         }
-        
+
         // Calculate class average
         if (!results.isEmpty()) {
             double average = results.stream()
                     .mapToDouble(QuizResult::getScorePercentage)
                     .average()
                     .orElse(0);
-            
+
             results.forEach(r -> r.setClassAverageScore(average));
         }
-        
+
         return results;
     }
 
-     @Override
+    @Override
     public QuizResult getStudentQuizResult(String quizId, String studentId) {
         return quizResultRepository.findByQuizIdAndStudentId(quizId, studentId);
     }
-    
+
     @Override
     public Map<String, Object> getQuizStatistics(String quizId) {
         List<QuizResult> results = quizResultRepository.findByQuizId(quizId);
-        
+
         Map<String, Object> stats = new HashMap<>();
-        
+
         if (results.isEmpty()) {
             stats.put("totalAttempts", 0);
             stats.put("averageScore", 0);
             stats.put("highestScore", 0);
             stats.put("lowestScore", 0);
+
+            Map<String, Long> emptyDistribution = new HashMap<>();
+            emptyDistribution.put("A (90-100%)", 0L);
+            emptyDistribution.put("B (80-89%)", 0L);
+            emptyDistribution.put("C (70-79%)", 0L);
+            emptyDistribution.put("D (60-69%)", 0L);
+            emptyDistribution.put("F (0-59%)", 0L);
+            stats.put("scoreDistribution", emptyDistribution);
+
             return stats;
         }
-        
+
         double[] scores = results.stream()
                 .mapToDouble(QuizResult::getScorePercentage)
                 .toArray();
-        
+
         stats.put("totalAttempts", results.size());
         stats.put("averageScore", Arrays.stream(scores).average().orElse(0));
         stats.put("highestScore", Arrays.stream(scores).max().orElse(0));
         stats.put("lowestScore", Arrays.stream(scores).min().orElse(0));
-        
+
         // Score distribution
         Map<String, Long> distribution = new HashMap<>();
         distribution.put("A (90-100%)", results.stream().filter(r -> r.getScorePercentage() >= 90).count());
-        distribution.put("B (80-89%)", results.stream().filter(r -> r.getScorePercentage() >= 80 && r.getScorePercentage() < 90).count());
-        distribution.put("C (70-79%)", results.stream().filter(r -> r.getScorePercentage() >= 70 && r.getScorePercentage() < 80).count());
-        distribution.put("D (60-69%)", results.stream().filter(r -> r.getScorePercentage() >= 60 && r.getScorePercentage() < 70).count());
+        distribution.put("B (80-89%)",
+                results.stream().filter(r -> r.getScorePercentage() >= 80 && r.getScorePercentage() < 90).count());
+        distribution.put("C (70-79%)",
+                results.stream().filter(r -> r.getScorePercentage() >= 70 && r.getScorePercentage() < 80).count());
+        distribution.put("D (60-69%)",
+                results.stream().filter(r -> r.getScorePercentage() >= 60 && r.getScorePercentage() < 70).count());
         distribution.put("F (0-59%)", results.stream().filter(r -> r.getScorePercentage() < 60).count());
-        
+
         stats.put("scoreDistribution", distribution);
-        
+
         return stats;
     }
-    
+
     @Override
     public void deleteQuizAttempt(String attemptId) {
         quizAttemptRepository.deleteById(attemptId);
     }
 }
-
-
-
-
-
-
