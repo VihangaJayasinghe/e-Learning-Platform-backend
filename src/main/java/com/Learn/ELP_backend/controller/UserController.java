@@ -137,7 +137,7 @@ public class UserController {
         response.put("role", user.getRole());
         response.put("email", user.getEmail());
         
-        // If it's a teacher, you might have these extra fields
+        // If it's a teacher, include additional info
         response.put("bio", user.getBio()); 
         response.put("qualification", user.getQualification());
         

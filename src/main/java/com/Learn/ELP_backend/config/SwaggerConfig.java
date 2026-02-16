@@ -17,7 +17,7 @@ public class SwaggerConfig {
                 .addSecuritySchemes("cookieAuth", new SecurityScheme()
                     .type(SecurityScheme.Type.APIKEY)
                     .in(SecurityScheme.In.COOKIE)
-                    .name("token"))) // Matches your cookie name
+                    .name("token"))) // Matches cookie name
             .addSecurityItem(new SecurityRequirement().addList("cookieAuth"));
     }
 }

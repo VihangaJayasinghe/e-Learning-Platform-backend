@@ -43,7 +43,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
             .csrf(customizer -> customizer.disable()) // Disable CSRF
-            .cors(customizer -> customizer.configurationSource(corsConfigurationSource())) // <--- KEY FIX: Enable CORS here
+            .cors(customizer -> customizer.configurationSource(corsConfigurationSource())) // Enable CORS with our config
             .authorizeHttpRequests(request -> request
                 .requestMatchers(
                     "/api/users/register",
@@ -89,7 +89,6 @@ public class SecurityConfig {
             .build();
     }
 
-    // <--- THIS IS THE MISSING PIECE --->
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

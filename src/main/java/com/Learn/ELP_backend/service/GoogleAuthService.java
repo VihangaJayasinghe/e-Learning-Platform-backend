@@ -39,7 +39,7 @@ public class GoogleAuthService {
             user = userRepository.save(user);
         }
 
-        // Generate JWT token (same as your regular login)
+        // Generate JWT token (same as regular login)
         return jwtService.GenerateToken(user);
     }
 }

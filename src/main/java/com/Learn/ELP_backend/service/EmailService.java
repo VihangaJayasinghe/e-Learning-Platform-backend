@@ -13,7 +13,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
     
-    
+    // Load email configuration from application.properties
     @Value("${spring.mail.username}")
     private String fromEmail;
     
@@ -43,6 +43,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    // Method to send OTP email for password reset verification (not implemented in controller yet))
     public void sendOTPEmail(String toEmail, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
