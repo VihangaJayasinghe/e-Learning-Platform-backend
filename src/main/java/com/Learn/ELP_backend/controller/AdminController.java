@@ -185,4 +185,115 @@ public ResponseEntity<?> delete(
         }
     }
 
+    // System Stats
+    @GetMapping("/stats")
+    public ResponseEntity<?> getSystemStats() {
+        try {
+            com.Learn.ELP_backend.dto.SystemStatsDTO stats = adminService.getSystemStats();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving system stats: " + e.getMessage());
+        }
+    }
+
+    // Course Management
+    @GetMapping("/courses")
+    public ResponseEntity<?> getAllCourses() {
+        try {
+            List<com.Learn.ELP_backend.model.Course> courses = adminService.getAllCourses();
+            return ResponseEntity.ok(courses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving courses: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/courses/instructor/{username}")
+    public ResponseEntity<?> getCoursesByInstructor(@PathVariable String username) {
+        try {
+            List<com.Learn.ELP_backend.model.Course> courses = adminService.getCoursesByInstructor(username);
+            if (courses != null && !courses.isEmpty()) {
+                return ResponseEntity.ok(courses);
+            } else {
+                return ResponseEntity.status(HttpStatus.SC_NOT_FOUND)
+                        .body("No courses found for instructor: " + username);
+            }
+        } catch (RuntimeException e) {
+             if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(HttpStatus.SC_NOT_FOUND)
+                        .body(e.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving courses: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving courses: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/courses/{id}/publish/{key}")
+    public ResponseEntity<?> publishCourse(@PathVariable String id, @PathVariable String key) {
+        try {
+            adminSecrity.validateKey(key);
+            com.Learn.ELP_backend.model.Course course = adminService.publishCourse(id);
+            return ResponseEntity.ok(course);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED)
+                    .body("Invalid security key: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error publishing course: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/courses/{id}/{key}")
+    public ResponseEntity<?> deleteCourse(@PathVariable String id, @PathVariable String key) {
+        try {
+            adminSecrity.validateKey(key);
+            adminService.deleteCourse(id);
+            return ResponseEntity.ok("Course with ID '" + id + "' deleted successfully");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED)
+                    .body("Invalid security key: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error deleting course: " + e.getMessage());
+        }
+    }
+
+    // Class Management
+    @GetMapping("/classes")
+    public ResponseEntity<?> getAllClasses() {
+        try {
+            List<com.Learn.ELP_backend.model.Class> classes = adminService.getAllClasses();
+            return ResponseEntity.ok(classes);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving classes: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/classes/{id}/{key}")
+    public ResponseEntity<?> deleteClass(@PathVariable String id, @PathVariable String key) {
+        try {
+            adminSecrity.validateKey(key);
+            adminService.deleteClass(id);
+            return ResponseEntity.ok("Class with ID '" + id + "' deleted successfully");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED)
+                    .body("Invalid security key: " + e.getMessage());
+        } catch (RuntimeException e) {
+             if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(HttpStatus.SC_NOT_FOUND)
+                        .body("Class not found with ID: " + id);
+            }
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error deleting class: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .body("Error deleting class: " + e.getMessage());
+        }
+    }
+
 }
