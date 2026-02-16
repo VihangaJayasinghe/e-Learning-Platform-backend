@@ -13,4 +13,6 @@ public interface EnrollmentRepository extends MongoRepository<Enrollment, String
     List<Enrollment> findByStudent(User student);
 
     List<Enrollment> findByClassEnrolled(Class classEnrolled);
+
+    List<Enrollment> findByClassEnrolledIn(List<Class> classes);
 }
