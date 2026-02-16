@@ -84,10 +84,73 @@ public List<User> getUserByRole(String role) {
 }
 
 
+    @Autowired
+    private com.Learn.ELP_backend.service.CourseService courseService;
+    
+    @Autowired
+    private com.Learn.ELP_backend.repository.CourseRepository courseRepository;
+    
+    @Autowired
+    private com.Learn.ELP_backend.repository.VideoRepository videoRepository;
+
+    @Autowired
+    private com.Learn.ELP_backend.service.ClassService classService;
+
     @Override
     public List<User> searchUsers(String keyword) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'searchUsers'");
     }
 
+    @Override
+    public com.Learn.ELP_backend.dto.SystemStatsDTO getSystemStats() {
+        long totalUsers = userRepository.count();
+        long totalCourses = courseRepository.count();
+        long totalVideos = videoRepository.count();
+        
+        long totalInstructors = userRepository.findByRole("INSTRUCTOR").size();
+        long totalStudents = userRepository.findByRole("STUDENT").size();
+        
+        return com.Learn.ELP_backend.dto.SystemStatsDTO.builder()
+                .totalUsers(totalUsers)
+                .totalCourses(totalCourses)
+                .totalVideos(totalVideos)
+                .totalInstructors(totalInstructors)
+                .totalStudents(totalStudents)
+                .build();
+    }
+
+    @Override
+    public void deleteCourse(String courseId) {
+        courseService.deleteCourse(courseId);
+    }
+
+    @Override
+    public com.Learn.ELP_backend.model.Course publishCourse(String courseId) {
+        return courseService.publishCourse(courseId);
+    }
+
+    @Override
+    public List<com.Learn.ELP_backend.model.Course> getAllCourses() {
+        return courseService.getAllCourses();
+    }
+
+    @Override
+    public List<com.Learn.ELP_backend.model.Course> getCoursesByInstructor(String instructorUsername) {
+        User instructor = userRepository.findByUsernameContainingIgnoreCase(instructorUsername);
+        if (instructor == null) {
+            throw new RuntimeException("Instructor not found with username: " + instructorUsername);
+        }
+        return courseService.getCoursesByInstructor(instructor.getId());
+    }
+
+    @Override
+    public List<com.Learn.ELP_backend.model.Class> getAllClasses() {
+        return classService.getAllClasses();
+    }
+
+    @Override
+    public void deleteClass(String classId) {
+        classService.deleteClass(classId);
+    }
 }
