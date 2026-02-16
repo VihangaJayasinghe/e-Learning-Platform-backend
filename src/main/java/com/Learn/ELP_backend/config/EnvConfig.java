@@ -9,14 +9,29 @@ public class EnvConfig {
 
     @PostConstruct
     public void loadEnv() {
-        Dotenv dotenv = Dotenv.load();
-        
-        System.setProperty("MONGODB_URI", dotenv.get("MONGODB_URI"));
-        System.setProperty("GOOGLE_CLIENT_ID", dotenv.get("GOOGLE_CLIENT_ID"));
-        System.setProperty("GOOGLE_CLIENT_SECRET", dotenv.get("GOOGLE_CLIENT_SECRET"));
-        System.setProperty("EMAIL_USERNAME", dotenv.get("EMAIL_USERNAME"));
-        System.setProperty("EMAIL_PASSWORD", dotenv.get("EMAIL_PASSWORD"));
-        
-        System.out.println("Environment variables loaded from .env");
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+
+        setSystemProperty("MONGODB_URI", dotenv);
+        setSystemProperty("GOOGLE_CLIENT_ID", dotenv);
+        setSystemProperty("GOOGLE_CLIENT_SECRET", dotenv);
+        setSystemProperty("EMAIL_USERNAME", dotenv);
+        setSystemProperty("EMAIL_PASSWORD", dotenv);
+        setSystemProperty("JWT_SECRET", dotenv);
+        setSystemProperty("CLOUDINARY_CLOUD_NAME", dotenv);
+        setSystemProperty("CLOUDINARY_API_KEY", dotenv);
+        setSystemProperty("CLOUDINARY_API_SECRET", dotenv);
+        setSystemProperty("STRIPE_SECRET_KEY", dotenv);
+
+        System.out.println("Environment variables configured.");
+    }
+
+    private void setSystemProperty(String key, Dotenv dotenv) {
+        String value = System.getenv(key);
+        if (value == null || value.isEmpty()) {
+            value = dotenv.get(key);
+        }
+        if (value != null) {
+            System.setProperty(key, value);
+        }
     }
 }
