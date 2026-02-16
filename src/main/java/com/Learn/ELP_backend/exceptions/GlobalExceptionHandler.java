@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@io.swagger.v3.oas.annotations.Hidden // Hide this class from Swagger documentation
 public class GlobalExceptionHandler {
 
     // 1. Handle Validation Errors (Password policy, NIC length, etc.)

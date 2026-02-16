@@ -55,7 +55,10 @@ public class SecurityConfig {
                     "/api/users/validate-reset-token",
                     "/auth/**",
                     "/login/**",
-                    "/oauth2/**"
+                    "/oauth2/**",
+                    "/v3/api-docs/**", 
+                    "/swagger-ui/**", 
+                    "/swagger-ui.html"
                 ).permitAll() // Allow these without token
                 .anyRequest().authenticated() // Block everything else
             )
